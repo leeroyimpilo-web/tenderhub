@@ -2,6 +2,9 @@ import pg from 'pg';
 import {normalizePortalOpportunity,validatePortalPage} from './normalize-portal.mjs';
 if(!process.env.DATABASE_URL){console.error('DATABASE_URL required; run npm run db:init first');process.exit(2)}
 const api='https://www.etenders.gov.za/Home/PaginatedTenderOpportunities';
+const pageFlag=process.argv.find(a=>a.startsWith('--pages='));
+const maxPages=pageFlag?Number(pageFlag.split('=')[1]):200;
+if(!Number.isInteger(maxPages)||maxPages<1||maxPages>200){console.error('Use --pages=1..200');process.exit(2)}
 const client=new pg.Client({connectionString:process.env.DATABASE_URL});
 let runId=null,pages=0,releases=0;
 async function page(start){
@@ -27,7 +30,7 @@ try{
  await client.connect();
  const r=await client.query("INSERT INTO sync_runs(source,success) VALUES($1,NULL) RETURNING id",['National Treasury official eTenders opportunities']);runId=r.rows[0].id;
  let start=0;
- for(let i=0;i<200;i++){
+ for(let i=0;i<maxPages;i++){
   const batch=await page(start);pages++;
   for(const value of batch.rows){
    const t=normalizePortalOpportunity(value);if(!t)continue;
@@ -37,7 +40,7 @@ try{
   console.log('Official portal page '+(i+1)+': '+batch.rows.length+' records; total='+batch.total);
   start+=batch.rows.length;
   if(!batch.rows.length||batch.rows.length<100||(batch.total&&start>=batch.total))break;
-  if(i===199)throw new Error('Exceeded pagination safety limit');
+  if(i===maxPages-1 && maxPages===200)throw new Error('Exceeded pagination safety limit');
   await new Promise(r=>setTimeout(r,250));
  }
  if(releases===0)throw new Error('Zero valid notices imported. Refusing to mark sync successful.');

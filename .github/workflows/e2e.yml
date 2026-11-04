@@ -1,0 +1,51 @@
+name: MVP end-to-end (live eTenders + ephemeral PostgreSQL)
+on:
+  push:
+    paths:
+      - .github/workflows/e2e.yml
+  workflow_dispatch:
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    services:
+      postgres:
+        image: postgres:17
+        env:
+          POSTGRES_DB: tenderhub_ci
+          POSTGRES_USER: tenderhub_ci
+          POSTGRES_PASSWORD: tenderhub_ci_test_only
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U tenderhub_ci -d tenderhub_ci"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 20
+    env:
+      DATABASE_URL: postgres://tenderhub_ci:tenderhub_ci_test_only@127.0.0.1:5432/tenderhub_ci
+      NEXT_TELEMETRY_DISABLED: "1"
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Install dependencies
+        run: npm install --no-audit --no-fund
+      - name: Install browser
+        run: npx playwright install --with-deps chromium
+      - name: Create schema
+        run: npm run db:init
+      - name: Import two pages of genuine official eTenders opportunities
+        run: npm run sync:portal -- --pages=2
+      - name: Execute browser scenarios
+        run: npm run test:e2e
+      - name: Upload failure report
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: tenderhub-e2e-report
+          path: |
+            playwright-report/
+            test-results/
+          if-no-files-found: ignore
