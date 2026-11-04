@@ -1,0 +1,50 @@
+name: TenderBase Native Offline Android
+on:
+  push:
+    branches: [development/native-offline-v1]
+    paths:
+      - native-android/**
+      - scripts/export-native-snapshot.mjs
+      - .github/workflows/native-offline-android.yml
+  workflow_dispatch:
+jobs:
+  native:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+      - name: Verify Android SDK is installed
+        run: test -d "$ANDROID_HOME" && echo "Android SDK installed"
+      - uses: gradle/actions/setup-gradle@v4
+        with:
+          gradle-version: '8.9'
+      - name: Bundle verified National Treasury tender snapshot
+        run: node scripts/export-native-snapshot.mjs
+        env:
+          TENDERBASE_API_URL: https://tenderhub-v2.onrender.com
+      - name: Verify real offline records exist
+        run: |
+          test -s native-android/app/src/main/assets/bootstrap.jsonl.gz
+          node -e "const m=require('./native-android/app/src/main/assets/snapshot-info.json');if(m.count<1000)process.exit(1);console.log('Records packaged: '+m.count)"
+      - name: Compile native offline Android APK
+        working-directory: native-android
+        run: gradle :app:assembleDebug --no-daemon --stacktrace
+      - name: Check real bootstrap data inside APK
+        run: |
+          test -s native-android/app/build/outputs/apk/debug/app-debug.apk
+          unzip -l native-android/app/build/outputs/apk/debug/app-debug.apk | grep -q 'assets/bootstrap.jsonl.gz'
+      - name: Upload native offline APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: TenderBase-Native-Offline-debug
+          path: native-android/app/build/outputs/apk/debug/app-debug.apk
+          if-no-files-found: error
