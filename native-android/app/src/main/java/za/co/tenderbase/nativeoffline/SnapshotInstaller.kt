@@ -9,61 +9,59 @@ import java.io.InputStreamReader
 import java.util.zip.GZIPInputStream
 
 object SnapshotInstaller {
-    private fun JSONObject.str(key: String): String? =
-        if (isNull(key) || !has(key)) null else optString(key).takeUnless { it == "null" }
+    private fun JSONObject.str(key:String):String? =
+        if(!has(key)||isNull(key)) null else optString(key).takeUnless {it=="null"||it.isBlank()}
 
-    suspend fun seed(context: Context, database: TenderDatabase): Int {
-        val dao = database.dao()
-        val existing = dao.count()
-        if (existing > 0) return existing
-
-        val all = ArrayList<Tender>()
-        var snapshotCount = 0
-        var exportTime = ""
-        var serverSync = ""
-
+    suspend fun seed(context:Context,database:TenderDatabase):Int {
+        val dao=database.dao()
+        // Upgrade v1 installations in-place, retaining bookmarks, notes and preferences.
+        if(dao.count()>0 && dao.meta("bootstrapSchema")=="2")return dao.count()
+        val all=ArrayList<Tender>()
+        var exported=""
+        var lastSync=""
+        var expected=0
         context.assets.open("bootstrap.tenderpack").use { asset ->
-            GZIPInputStream(asset).use { gzip ->
-                BufferedReader(InputStreamReader(gzip, Charsets.UTF_8)).use { reader ->
-                    val header = JSONObject(reader.readLine() ?: error("Snapshot header missing"))
-                    check(header.getString("type") == "tenderbase-offline-bootstrap-v1") {
-                        "Unexpected data source in offline snapshot"
-                    }
-                    snapshotCount = header.getInt("count")
-                    exportTime = header.getString("exportedAt")
-                    serverSync = header.getString("lastServerSync")
-                    check(snapshotCount >= 1000) { "Insufficient official tender records" }
-                    while (true) {
-                        val line = reader.readLine() ?: break
-                        if (line.isBlank()) continue
-                        val o = JSONObject(line)
-                        val doc = o.optJSONArray("documents") ?: JSONArray()
-                        val id = o.getString("id")
-                        val title = o.getString("title")
-                        val url = o.getString("source_url")
+            GZIPInputStream(asset).use { zip ->
+                BufferedReader(InputStreamReader(zip, Charsets.UTF_8)).use { reader ->
+                    val h=JSONObject(reader.readLine() ?: error("Offline snapshot missing"))
+                    check(h.getString("type")=="tenderbase-offline-bootstrap-v1")
+                    expected=h.getInt("count")
+                    check(expected>=1000)
+                    exported=h.getString("exportedAt")
+                    lastSync=h.getString("lastServerSync")
+                    while(true){
+                        val line=reader.readLine()?:break
+                        if(line.isBlank())continue
+                        val t=JSONObject(line)
+                        val id=t.getString("id")
+                        val title=t.getString("title")
+                        val url=t.getString("source_url")
                         check(id.isNotBlank() && title.isNotBlank() && url.startsWith("https://"))
-                        all.add(Tender(
-                            id=id, reference=o.str("reference"), title=title,
-                            description=o.str("description"), buyer=o.str("buyer"),
-                            province=o.str("province"), category=o.str("category"),
-                            status=o.str("status"), publishedAt=o.str("published_at"),
-                            closingAt=o.str("closing_at"), releaseAt=o.str("release_at"),
-                            sourceUrl=url, documentsJson=doc.toString(),
-                            syncedAt=o.str("synced_at")
+                        all.add(Tender(id=id,title=title,sourceUrl=url,
+                            reference=t.str("reference"),description=t.str("description"),
+                            buyer=t.str("buyer"),province=t.str("province"),category=t.str("category"),
+                            status=t.str("status"),publishedAt=t.str("published_at"),
+                            closingAt=t.str("closing_at"),releaseAt=t.str("release_at"),
+                            documentsJson=(t.optJSONArray("documents")?:JSONArray()).toString(),
+                            syncedAt=t.str("synced_at"),
+                            contactName=t.str("contact_name"),contactEmail=t.str("contact_email"),
+                            contactPhone=t.str("contact_phone"),briefingAt=t.str("briefing_at"),
+                            briefingVenue=t.str("briefing_venue")
                         ))
                     }
                 }
             }
         }
-        check(all.size == snapshotCount && all.map { it.id }.toSet().size == snapshotCount) {
-            "Snapshot incomplete or duplicate records"
+        check(all.size==expected && all.map{it.id}.toSet().size==expected){
+            "Official tender snapshot is incomplete"
         }
         database.withTransaction {
-            all.chunked(100).forEach { dao.upsertTenders(it) }
-            dao.upsertMeta(SnapshotMeta("exportedAt", exportTime))
-            dao.upsertMeta(SnapshotMeta("lastServerSync", serverSync))
-            dao.upsertMeta(SnapshotMeta("recordCount", snapshotCount.toString()))
+            all.chunked(100).forEach{dao.upsertTenders(it)}
+            dao.upsertMeta(SnapshotMeta("exportedAt",exported))
+            dao.upsertMeta(SnapshotMeta("lastServerSync",lastSync))
+            dao.upsertMeta(SnapshotMeta("recordCount",expected.toString()))
+            dao.upsertMeta(SnapshotMeta("bootstrapSchema","2"))
         }
-        return snapshotCount
+        return expected
     }
 }
