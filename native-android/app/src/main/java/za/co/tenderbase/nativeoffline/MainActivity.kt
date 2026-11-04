@@ -113,7 +113,10 @@ fun TenderApp(vm:TenderViewModel){
                                 else->Icon(Icons.Outlined.BarChart,contentDescription=null)
                             }
                         },
-                        label={Text(item)},
+                        label={Text(item,
+                            style=MaterialTheme.typography.labelMedium,
+                            fontWeight=if(active)androidx.compose.ui.text.font.FontWeight.Bold
+                                else androidx.compose.ui.text.font.FontWeight.Medium)},
                         colors=NavigationBarItemDefaults.colors(
                             selectedIconColor=TB.text,selectedTextColor=TB.text,
                             indicatorColor=TB.accent,unselectedIconColor=TB.secondary,
@@ -188,6 +191,7 @@ fun TenderApp(vm:TenderViewModel){
             )
             else->InsightsScreen(
                 all=all,lastSync=sync,selectedTab=insightsTab,
+                preferredProvince=province,
                 onTab={insightsTab=it},modifier=modifier
             )
         }
