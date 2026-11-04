@@ -18,7 +18,7 @@ import androidx.compose.ui.unit.dp
 
 @Composable
 fun InsightsScreen(all:List<Tender>,lastSync:String?,selectedTab:String,
-                   onTab:(String)->Unit,modifier:Modifier=Modifier){
+                   preferredProvince:String,onTab:(String)->Unit,modifier:Modifier=Modifier){
     val grouped=remember(all,selectedTab){analytics(all,selectedTab)}
     val max=grouped.maxOfOrNull{it.second}?.coerceAtLeast(1)?:1
     LazyColumn(modifier.fillMaxSize().testTag("insights-screen"),
@@ -66,7 +66,12 @@ fun InsightsScreen(all:List<Tender>,lastSync:String?,selectedTab:String,
             StateMessage("No research data","The official snapshot did not contain grouped records.")
         }else{
             itemsIndexed(grouped.take(15),key={_,x->x.first}){idx,(name,count)->
-                Column(Modifier.fillMaxWidth().padding(vertical=6.dp)){
+                val preferred=selectedTab=="Provinces" && preferredProvince.isNotBlank() &&
+                    name==preferredProvince
+                Column(Modifier.fillMaxWidth()
+                    .then(if(preferred)Modifier.background(TB.accentSoft,
+                        RoundedCornerShape(9.dp))else Modifier)
+                    .padding(horizontal=if(preferred)8.dp else 0.dp,vertical=6.dp)){
                     Row(verticalAlignment=Alignment.CenterVertically,
                         horizontalArrangement=Arrangement.spacedBy(10.dp)){
                         Text((idx+1).toString().padStart(2,'0'),
