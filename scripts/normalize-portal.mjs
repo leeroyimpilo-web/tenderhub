@@ -21,7 +21,9 @@ export function portalDocuments(row){
   if(Array.isArray(value)){value.forEach(v=>visit(v,hint));return}
   const obj=record(value);
   const keys=new Map(Object.entries(obj).map(([k,v])=>[k.replace(/[^a-z0-9]/gi,'').toLowerCase(),v]));
-  const blob=clean(keys.get('blobname'))??clean(keys.get('blobfilename'));
+  const supportId=clean(keys.get('supportdocumentid'));
+  const extension=clean(keys.get('extension'));
+  const blob=clean(keys.get('blobname'))??clean(keys.get('blobfilename'))??(supportId&&extension?supportId+extension:null);
   const file=clean(keys.get('downloadedfilename'))??clean(keys.get('filename'))??clean(keys.get('originalfilename'))??clean(keys.get('documentname'));
   const direct=clean(keys.get('url'))??clean(keys.get('documenturl'))??clean(keys.get('downloadurl'));
   const identifier=clean(keys.get('supportdocumentid'))??clean(keys.get('id'))??blob;
@@ -34,7 +36,7 @@ export function portalDocuments(row){
   }
   if(url && (hint||blob||keys.has('supportdocumentid'))){
    const id=identifier??url;
-   found.set(id,{id,title,url,format:clean(keys.get('format'))??clean(keys.get('contenttype')),publishedAt:asDate(keys.get('datepublished'))});
+   found.set(id,{id,title,url,format:clean(keys.get('format'))??clean(keys.get('contenttype')),publishedAt:asDate(keys.get('datepublished')??keys.get('datemodified'))});
   }
   for(const [key,child] of Object.entries(obj)){
    const k=key.replace(/[^a-z0-9]/gi,'').toLowerCase();
