@@ -8,6 +8,10 @@ on:
       - scripts/instantiate-manrope.py
       - .github/workflows/native-offline-android.yml
   workflow_dispatch:
+# Supersede obsolete APK jobs when a later sprint commit is pushed.
+concurrency:
+  group: tenderbase-native-${{ github.ref }}
+  cancel-in-progress: true
 jobs:
   native:
     runs-on: ubuntu-latest
