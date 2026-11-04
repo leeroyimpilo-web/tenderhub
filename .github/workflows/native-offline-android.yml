@@ -41,7 +41,9 @@ jobs:
       - name: Check real bootstrap data inside APK
         run: |
           test -s native-android/app/build/outputs/apk/debug/app-debug.apk
-          unzip -l native-android/app/build/outputs/apk/debug/app-debug.apk | grep -q 'assets/bootstrap.jsonl.gz'
+          unzip -Z -1 native-android/app/build/outputs/apk/debug/app-debug.apk > /tmp/tenderbase-apk-entries.txt
+          grep -F 'bootstrap' /tmp/tenderbase-apk-entries.txt || true
+          grep -Fx 'assets/bootstrap.jsonl.gz' /tmp/tenderbase-apk-entries.txt
       - name: Upload native offline APK
         uses: actions/upload-artifact@v4
         with:
