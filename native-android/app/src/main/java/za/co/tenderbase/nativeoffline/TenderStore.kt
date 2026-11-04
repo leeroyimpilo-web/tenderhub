@@ -68,7 +68,7 @@ abstract class TenderDatabase:RoomDatabase(){
                 db.execSQL("ALTER TABLE tenders ADD COLUMN briefingAt TEXT")
                 db.execSQL("ALTER TABLE tenders ADD COLUMN briefingVenue TEXT")
                 db.execSQL("CREATE TABLE IF NOT EXISTS bids (tenderId TEXT NOT NULL PRIMARY KEY, stage TEXT NOT NULL, notes TEXT NOT NULL, updatedAt TEXT NOT NULL)")
-                db.execSQL("CREATE TABLE IF NOT EXISTS dismissed_alerts (\`key\` TEXT NOT NULL PRIMARY KEY)")
+                db.execSQL("CREATE TABLE IF NOT EXISTS dismissed_alerts (key TEXT NOT NULL PRIMARY KEY)")
                 db.execSQL("CREATE TABLE IF NOT EXISTS preferences (name TEXT NOT NULL PRIMARY KEY, value TEXT NOT NULL)")
             }
         }
