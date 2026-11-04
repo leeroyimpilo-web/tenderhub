@@ -11,8 +11,8 @@ android {
         applicationId = "za.co.tenderbase.nativeui"
         minSdk = 26
         targetSdk = 35
-        versionCode = 2
-        versionName = "0.2.0-native-ui"
+        versionCode = 3
+        versionName = "0.3.0-ui-stability"
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
     buildTypes { getByName("release") { isMinifyEnabled = false } }
