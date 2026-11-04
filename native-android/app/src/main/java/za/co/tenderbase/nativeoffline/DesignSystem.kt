@@ -29,12 +29,15 @@ object TB {
     val urgentSoft=Color(0xFFF4DFD6)
     val border=Color(0xFFD4D7CD)
 }
+// Every weight is a real static Manrope instance generated from the OFL variable
+// source at build time. Re-labelling the same variable file as multiple weights
+// does not guarantee Android will draw the intended bold outlines.
 val brandFamily=FontFamily(
-    Font(R.font.manrope,FontWeight.Normal),
-    Font(R.font.manrope,FontWeight.Medium),
-    Font(R.font.manrope,FontWeight.SemiBold),
-    Font(R.font.manrope,FontWeight.Bold),
-    Font(R.font.manrope,FontWeight.ExtraBold)
+    Font(R.font.manrope_regular,FontWeight.Normal),
+    Font(R.font.manrope_medium,FontWeight.Medium),
+    Font(R.font.manrope_semibold,FontWeight.SemiBold),
+    Font(R.font.manrope_bold,FontWeight.Bold),
+    Font(R.font.manrope_extrabold,FontWeight.ExtraBold)
 )
 @Composable
 fun TenderTheme(content:@Composable ()->Unit){
@@ -59,7 +62,9 @@ fun TenderTheme(content:@Composable ()->Unit){
         labelLarge=TextStyle(fontFamily=brandFamily,fontWeight=FontWeight.Bold,fontSize=14.sp,
             lineHeight=19.sp,color=TB.text),
         labelMedium=TextStyle(fontFamily=brandFamily,fontWeight=FontWeight.Medium,fontSize=12.sp,
-            lineHeight=17.sp,color=TB.secondary)
+            lineHeight=17.sp,color=TB.secondary),
+        labelSmall=TextStyle(fontFamily=brandFamily,fontWeight=FontWeight.Medium,fontSize=11.sp,
+            lineHeight=15.sp,color=TB.secondary)
     )
     MaterialTheme(colorScheme=colors,typography=typ,content=content)
 }
