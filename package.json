@@ -13,7 +13,8 @@
     "db:init": "node scripts/db-init.mjs",
     "sync:etenders": "node scripts/sync-etenders.mjs",
     "sync:30d": "node scripts/sync-etenders.mjs --days=30",
-    "test:ocds": "node --test tests/ocds.test.mjs"
+    "test:ocds": "node --test tests/*.test.mjs",
+    "import:official": "node scripts/import-ocds-file.mjs"
   },
   "dependencies": {
     "lucide-react": "^0.468.0",

@@ -18,8 +18,9 @@ Node 20+, a PostgreSQL database (Neon is supported), and network access to the o
 2. Copy `.env.example` to `.env.local`, then set `DATABASE_URL`. Do not commit credentials.
 3. `npm run db:init` (loads the SQL schema)
 4. `npm run sync:etenders` (7-day release window); use `npm run sync:30d` for a larger initial backfill.
-5. `npm run dev` to run the public web interface.
-6. `npm run typecheck`, `npm run test:ocds`, and `npm run build` to validate.
+5. If the live official API fails, download official monthly OCDS JSON from https://data.etenders.gov.za/Home/ReleasesFiles, extract the JSON or JSONL file and run `npm run import:official -- /path/to/download.json` (also supports `.gz`). This imports genuine official records only.
+6. `npm run dev` to run the public web interface.
+7. `npm run typecheck`, `npm run test:ocds`, and `npm run build` to validate.
 
 For deployment, use Render (Node web app) and Neon (PostgreSQL). Run the importer as an isolated scheduled job and monitor `sync_runs` failures. The UI never substitutes mock tenders if the official feed is unavailable.
 
@@ -38,7 +39,7 @@ For deployment, use Render (Node web app) and Neon (PostgreSQL). Run the importe
 ## Sources and limitations
 Official publication: https://data.etenders.gov.za/Home/LearnMore
 
-Current importer endpoint: `https://ocds-api.etenders.gov.za/api/OCDSReleases`; the official Swagger page has been observed to return HTTP 404, so production source testing is mandatory. The dataset does not include every government procurement process. Fields absent in source data are labeled as not supplied. Documents link to URLs in official releases; missing URLs cannot be conjured.
+Current importer endpoint: `https://ocds-api.etenders.gov.za/api/OCDSReleases`; the official Swagger page returned HTTP 404, and a live API probe on 4 November 2026 returned HTTP 500 for multiple valid date windows (HTTP 400 without mandatory dates). The official bulk JSON import is the fallback; neither source has been successfully imported into a configured database yet. The dataset does not include every government procurement process. Fields absent in source data are labeled as not supplied. Documents link to URLs in official releases; missing URLs cannot be conjured.
 
 In-app alert reminders appear upon opening the app; **background Android notifications are not implemented**. This is intentional rather than a fake notification toggle. APK packaging and device testing remain future work.
 
