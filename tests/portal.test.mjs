@@ -18,3 +18,5 @@ test('resolves current portal document metadata into official download URL',()=>
  assert.match(t.documents[0].url,/blobName=e3b7c098-775a-4f54-bc18-fd4cef5b1da3.pdf/);
  assert.match(t.documents[0].url,/downloadedFileName=Specifications.pdf/);
 });
+
+test('links official notice records to their portal URL',()=>{const notice=normalizePortalOpportunity({id:176624,description:'Fixture'});assert.equal(notice.source_url,'https://www.etenders.gov.za/Home/?id=176624')});
