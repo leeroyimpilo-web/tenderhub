@@ -16,8 +16,16 @@ export default async function Details({params}:{params:{id:string}}){
  if(tender===null)notFound();
  const t=tender;
  const raw=(t.raw?.tender??{}) as Record<string,any>;
- const briefing=(raw.briefingSession??{}) as Record<string,unknown>;
- const contact=(raw.contactPerson??{}) as Record<string,unknown>;
+ const portal=t.raw??{};
+ const briefing=(raw.briefingSession??{
+   date:typeof portal.compulsory_briefing_session==='string'?portal.compulsory_briefing_session:null,
+   venue:typeof portal.briefingVenue==='string'?portal.briefingVenue:null
+ }) as Record<string,unknown>;
+ const contact=(raw.contactPerson??{
+   name:typeof portal.contactPerson==='string'?portal.contactPerson:null,
+   email:typeof portal.email==='string'?portal.email:null,
+   telephone:typeof portal.telephone==='string'?portal.telephone:null
+ }) as Record<string,unknown>;
  return <main className="tb-v2-content">
   <Link href="/search" className="inline-flex items-center gap-2 text-[12px] font-semibold text-blue mb-5"><ArrowLeft size={15}/> Back to search</Link>
   <div className="tb-v2-panel">

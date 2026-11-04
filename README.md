@@ -9,7 +9,7 @@ A new open-access South African tender intelligence MVP, using **only official N
 - Local device watchlist, bid pipeline notes/stages, calendar file export, in-app deadline alerts and preference storage.
 - PostgreSQL SQL schema, paginated official OCDS ingestion, source health endpoint, and normalization unit tests.
 
-**Important: these modules are committed but have not yet been verified in a deployed environment. No live tender feed or installable Android APK is claimed.** Dedicated Neon `tenderhub-v2` database initialized and 2,020 genuine first-party eTenders opportunities imported and verified on 4 Nov 2026. Code checks passed, but continuous sync credentials, web deployment, end-to-end browser testing and Android build are still needed.
+**Important: these modules are committed but have not yet been verified in a deployed environment. No live tender feed or installable Android APK is claimed.** Dedicated Neon `tenderhub-v2` database initialized and 2,020 genuine first-party eTenders opportunities imported and verified on 4 Nov 2026. The same dataset now contains 6,902 official document URLs across 2,016 opportunities; one direct PDF link was checked successfully (HTTP 200). Code checks passed, but continuous sync credentials, web deployment, end-to-end browser testing and Android build are still needed.
 
 ## Requirements
 Node 20+, a PostgreSQL database (Neon is supported), and network access to the official eTenders API.
@@ -62,4 +62,4 @@ No dummy data, demo buttons, paywalls, local municipal scrapers, or authenticati
 - Render will prompt for `DATABASE_URL` privately at Blueprint creation. Copy the pooled connection string from the Neon `tenderhub-v2` project's `tenderhub` database, never paste it into GitHub source or chat.
 - The schedule in `.github/workflows/sync-live.yml` runs every 6 hours **only after** a GitHub Actions secret named `TENDERHUB_DATABASE_URL` is configured. Without it, the workflow announces the missing secret and does not sync.
 - Sync uses `npm run sync:portal`. For official OCDS archives, `npm run import:official -- archive.json` remains available.
-- Deployment & Android app are not yet complete. Source contact and document link extraction need end-to-end validation against real notices before shipping.
+- Deployment & Android app are not yet complete. Document URL format was tested successfully against an official downloadable PDF; broader device-level document and contact verification remain part of release testing.
