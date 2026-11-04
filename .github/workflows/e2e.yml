@@ -3,6 +3,12 @@ on:
   push:
     paths:
       - .github/workflows/e2e.yml
+      - tests/e2e/**
+      - src/components/LocalProvider.tsx
+      - src/app/saved/page.tsx
+      - src/app/alerts/page.tsx
+      - src/app/api/tenders/**
+      - src/lib/tenders.ts
   workflow_dispatch:
 jobs:
   test:
