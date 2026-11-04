@@ -41,7 +41,8 @@ fun MyBidsScreen(all:List<Tender>,saved:Set<String>,bids:List<Bid>,selectedTab:S
                 if(active)Button(onClick={onTab(key)},
                     modifier=Modifier.weight(1f).heightIn(min=48.dp),
                     shape=RoundedCornerShape(9.dp)){
-                    Text(key+" "+n)
+                    Text(key+" "+n,color=Color.White,
+                        style=MaterialTheme.typography.labelLarge)
                 }else TextButton(onClick={onTab(key)},
                     modifier=Modifier.weight(1f).heightIn(min=48.dp)){
                     Text(key+" "+n)
