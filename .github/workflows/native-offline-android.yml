@@ -5,6 +5,7 @@ on:
     paths:
       - native-android/**
       - scripts/export-native-snapshot.mjs
+      - scripts/instantiate-manrope.py
       - .github/workflows/native-offline-android.yml
   workflow_dispatch:
 jobs:
@@ -41,6 +42,14 @@ jobs:
           curl -fsSL --retry 3 'https://raw.githubusercontent.com/google/fonts/main/ofl/manrope/Manrope%5Bwght%5D.ttf' -o native-android/app/src/main/res/font/manrope.ttf
           test "$(git hash-object native-android/app/src/main/res/font/manrope.ttf)" = '75274da58537d6123b14f2cd0c355ad4681fc2b3'
           curl -fsSL --retry 3 'https://raw.githubusercontent.com/google/fonts/main/ofl/manrope/OFL.txt' -o native-android/app/src/main/assets/MANROPE-OFL.txt
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Generate verified static Manrope font weights
+        run: |
+          python -m pip install --disable-pip-version-check 'fonttools==4.58.5'
+          python scripts/instantiate-manrope.py native-android/app/src/main/res/font/manrope.ttf
+          test -s native-android/app/src/main/res/font/manrope_extrabold.ttf
       - name: Run native unit tests
         working-directory: native-android
         run: gradle :app:testDebugUnitTest --no-daemon --stacktrace
@@ -82,10 +91,10 @@ jobs:
       - name: Capture actual offline native screens on emulator
         uses: reactivecircus/android-emulator-runner@v2
         with:
-          api-level: 35
+          api-level: 30
           arch: x86_64
-          profile: pixel_6
-          emulator-options: -no-snapshot -no-window -gpu swiftshader_indirect -noaudio -no-boot-anim
+          profile: pixel_2
+          emulator-options: -no-window -no-snapshot -gpu swiftshader_indirect -noaudio -no-boot-anim -memory 1536 -cores 2
           script: TENDERBASE_APK=native-apk/app-debug.apk python3 scripts/capture-native-screens.py
       - name: Upload actual native app screenshots
         if: always()
