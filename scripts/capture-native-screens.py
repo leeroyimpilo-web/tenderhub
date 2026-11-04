@@ -68,7 +68,17 @@ def tap_label(needle, timeout=25):
         time.sleep(1)
     raise RuntimeError("No accessible UI action matching: " + needle)
 
+def assert_app_alive(stage):
+    process = adb("shell", "pidof", "za.co.tenderbase.nativeui", check=False)
+    if not process.stdout.strip():
+        crash = adb("logcat", "-d", "-t", "300", "-s", "AndroidRuntime:E", check=False)
+        raise RuntimeError(f"TenderBase process stopped during {stage}:\\n{crash.stdout[-7000:]}")
+    crash = adb("logcat", "-d", "-t", "250", "-s", "AndroidRuntime:E", check=False)
+    if "FATAL EXCEPTION" in crash.stdout and "za.co.tenderbase.nativeui" in crash.stdout:
+        raise RuntimeError(f"AndroidRuntime crash during {stage}:\\n{crash.stdout[-7000:]}")
+
 def capture(filename):
+    assert_app_alive(filename)
     target = output / filename
     with target.open("wb") as f:
         subprocess.run(["adb", "exec-out", "screencap", "-p"], stdout=f, check=True, timeout=30)
