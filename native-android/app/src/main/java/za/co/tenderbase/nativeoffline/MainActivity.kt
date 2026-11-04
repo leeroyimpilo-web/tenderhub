@@ -191,5 +191,6 @@ fun TenderApp(vm:TenderViewModel){
                 onTab={insightsTab=it},modifier=modifier
             )
         }
-        }
+    }
+    }
 }
