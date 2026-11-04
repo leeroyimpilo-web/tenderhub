@@ -47,6 +47,26 @@ class TenderLogicTest {
         assertEquals(0,activeAlertTenders(listOf(open),7,
             setOf("x|2026-11-06T11:00:00"),now).size)
     }
+    @Test fun repeatedOfflineSearchKeepsResultsStable() {
+        val records=(1..2020).map { index ->
+            tender(index.toString(),if(index%2==0)"2026-11-12T11:00:00"
+                else "2026-11-01T11:00:00")
+        }
+        val criteria=SearchCriteria(query="pump",province="KwaZulu-Natal",status="open")
+        repeat(4) {
+            val found=searchOffline(records,criteria,now)
+            assertEquals(1010,found.size)
+            assertTrue(found.all { it.id.toInt()%2==0 })
+        }
+    }
+    @Test fun invalidSourceDatesNeverCrashSearch() {
+        val malformed=tender("invalid","not-a-date")
+        assertNull(tenderInstant(malformed.closingAt))
+        assertNull(tenderInstant(malformed.closingAt))
+        assertEquals("Not supplied",formatDate(malformed.closingAt))
+        assertTrue(searchOffline(listOf(malformed),SearchCriteria(status="open"),now).isEmpty())
+    }
+
     @Test fun insightsUseActualGroupCounts() {
         val data=listOf(tender("a",null),tender("b",null),tender("c",null,"Gauteng"))
         assertEquals(listOf("KwaZulu-Natal" to 2,"Gauteng" to 1),analytics(data,"Provinces"))
