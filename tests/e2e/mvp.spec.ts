@@ -15,6 +15,12 @@ test('open-access end-to-end flow with actual National Treasury tenders',async({
  expect(first.title).toBeTruthy();
  expect(first.source_url).toMatch(/^https:\/\//);
 
+ const refreshed=await request.post('/api/tenders/refresh',{data:{ids:[first.id]}});
+ expect(refreshed.ok()).toBeTruthy();
+ const refreshedData=await refreshed.json();
+ expect(refreshedData.items).toHaveLength(1);
+ expect(refreshedData.items[0].id).toBe(first.id);
+
  await page.goto('/');
  await expect(page.getByRole('heading',{name:/Know what matters/})).toBeVisible();
  await expect(page.getByRole('link',{name:/Find tenders/}).first()).toBeVisible();
@@ -40,6 +46,10 @@ test('open-access end-to-end flow with actual National Treasury tenders',async({
  await expect(page.locator('article').first()).toContainText(first.title);
  await page.reload();
  await expect(page.locator('article').first()).toContainText(first.title);
+ const refreshButton=page.getByRole('button',{name:'Refresh saved'});
+ await expect(refreshButton).toBeEnabled();
+ await refreshButton.click();
+ await expect(page.getByText('Saved notices checked against live data.')).toBeVisible();
 
  await page.goto('/pipeline');
  await expect(page.locator('article').first()).toContainText(first.title);
