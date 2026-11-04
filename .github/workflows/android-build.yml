@@ -1,10 +1,17 @@
 name: Build TenderBase Android APK
 on:
+  push:
+    branches: [main]
+    paths:
+      - .github/workflows/android-build.yml
+      - capacitor.config.ts
+      - capacitor-www/**
   workflow_dispatch:
     inputs:
       app_url:
         description: 'Verified HTTPS URL of the deployed TenderBase web app'
-        required: true
+        required: false
+        default: 'https://tenderhub-v2.onrender.com'
         type: string
 jobs:
   android:
@@ -13,7 +20,7 @@ jobs:
     permissions:
       contents: read
     env:
-      TENDERBASE_APP_URL: ${{ inputs.app_url }}
+      TENDERBASE_APP_URL: ${{ inputs.app_url || 'https://tenderhub-v2.onrender.com' }}
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
@@ -25,18 +32,52 @@ jobs:
           java-version: '21'
       - uses: android-actions/setup-android@v3
       - uses: gradle/actions/setup-gradle@v4
-      - name: Verify live database, official records and HTTPS
+      - name: Verify live database, official records and tender search
+        shell: bash
         run: |
-          node -e "const u=new URL(process.env.TENDERBASE_APP_URL);if(u.protocol!=='https:')throw Error('HTTPS required');fetch(new URL('/api/health',u),{signal:AbortSignal.timeout(30000)}).then(async r=>{if(!r.ok)throw Error('Health HTTP '+r.status);const d=await r.json();if(!d.ok||!(d.count>0)||!d.lastSync)throw Error('TenderBase is not ready with imported official tenders');console.log('Verified '+d.count+' official records');}).catch(e=>{console.error(e);process.exit(1)});"
+          node --input-type=module <<'NODE'
+          const root = new URL(process.env.TENDERBASE_APP_URL);
+          if (root.protocol !== 'https:') throw Error('HTTPS required for Android app');
+          if (!['tenderhub-v2.onrender.com'].includes(root.hostname)) {
+            console.log('Using a custom HTTPS TenderBase host:', root.hostname);
+          }
+          async function getJson(path) {
+            for (let attempt = 1; attempt <= 4; attempt++) {
+              try {
+                const res = await fetch(new URL(path, root), {
+                  signal: AbortSignal.timeout(45000),
+                  headers: { Accept: 'application/json' }
+                });
+                if (!res.ok) throw Error(path + ' returned HTTP ' + res.status);
+                return await res.json();
+              } catch (error) {
+                if (attempt === 4) throw error;
+                console.warn(path + ' attempt ' + attempt + ' failed, retrying:', String(error));
+                await new Promise(resolve => setTimeout(resolve, attempt * 5000));
+              }
+            }
+          }
+          const health = await getJson('/api/health');
+          if (!health.ok || !(health.count > 0) || !health.lastSync) {
+            throw Error('Live database health is not ready: valid official records and last sync required');
+          }
+          const tenders = await getJson('/api/tenders?status=open&pageSize=2');
+          if (!Array.isArray(tenders.items) || !(tenders.total > 0) ||
+              !tenders.items[0]?.id || !tenders.items[0]?.title) {
+            throw Error('Live open-tender search failed. Refusing to package empty/demo app.');
+          }
+          console.log('Verified live National Treasury eTenders database:', health.count, 'records');
+          console.log('Verified live open-tender search:', tenders.total, 'matching records');
+          NODE
       - name: Install packages
         run: npm install --no-audit --no-fund
       - name: Generate native Android platform and sync
         run: |
           npx cap add android
           npx cap sync android
-      - name: Assemble signed-for-testing debug APK
+      - name: Assemble debug APK
         run: cd android && chmod +x gradlew && ./gradlew assembleDebug --no-daemon
-      - name: Upload APK artifact
+      - name: Upload installable Android APK
         uses: actions/upload-artifact@v4
         with:
           name: TenderBase-v2-Android-debug
