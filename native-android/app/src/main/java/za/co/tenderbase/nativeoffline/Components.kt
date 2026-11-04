@@ -75,7 +75,8 @@ fun SegmentTabs(tabs:List<String>,active:String,onClick:(String)->Unit,
                     modifier=Modifier.fillMaxWidth().heightIn(min=48.dp),
                     colors=ButtonDefaults.textButtonColors(contentColor=TB.text)
                 ){
-                    Text(label,fontWeight=if(active==label)FontWeight.Bold else FontWeight.Normal,
+                    Text(label,style=MaterialTheme.typography.labelLarge,
+                        fontWeight=if(active==label)FontWeight.ExtraBold else FontWeight.Medium,
                         maxLines=1)
                 }
                 Box(Modifier.fillMaxWidth().height(if(active==label)4.dp else 1.dp)
