@@ -1,28 +1,53 @@
-# TenderBase V2 · Open eTenders MVP
+# TenderBase V2 — TenderHub
 
-TenderBase is a South African, login-free tender intelligence app. This is a **new implementation**, not a production release yet.
+A new open-access South African tender intelligence MVP, using **only official National Treasury eTenders OCDS releases**. No account, authentication, payments, subscriptions, or separate municipal crawling.
 
-## Locked scope
-- Preserve the previous TenderBase visual language: navy gradient Today page, Poppins typography, clean white cards, mobile bottom navigation and desktop sidebar.
-- Only National Treasury eTenders **OCDS** data; no separate municipal or commercial discovery.
-- Open without registration or payment. No auth, billing, subscriptions, plans, trial or paywalls.
-- All shipped controls must be functional. Never ship mock tenders, demo actions or inactive buttons.
-- Features: Today, Find, Research, tender details and documents, Saved, Pipeline, deadline calendar, alerts/reminders, settings and source-health display.
-- Save personal app state locally to the device. Don't publish personal user data to a server.
+## Implemented source modules
+- Original TenderBase navy/Poppins/Tailwind visual tokens and responsive navigation.
+- Server-backed Today, Find (real SQL filters + pagination), Research, tender details and documents.
+- Local device watchlist, bid pipeline notes/stages, calendar file export, in-app deadline alerts and preference storage.
+- PostgreSQL SQL schema, paginated official OCDS ingestion, source health endpoint, and normalization unit tests.
 
-## Architecture
-Next.js + TypeScript + Tailwind CSS front end, Node ingestion job, PostgreSQL (Neon) for shared official tender data, Capacitor Android packaging later. Front-end should tolerate server unavailability with honest error states, never fabricated records.
+**Important: these modules are committed but have not yet been verified in a deployed environment. No live tender feed or installable Android APK is claimed.** An actual DATABASE_URL, database initialization, successful official OCDS sync, CI checks, and live deployment are required before release.
 
-## Source of truth
-National Treasury: https://data.etenders.gov.za/ (OCDS API & bulk downloads).
-The API endpoint `https://ocds-api.etenders.gov.za/api/OCDSReleases` must be verified with live tests before declaring live synchronization complete.
+## Requirements
+Node 20+, a PostgreSQL database (Neon is supported), and network access to the official eTenders API.
 
-## Status
-- [x] Fresh GitHub repository initialized
-- [ ] UI ported and typechecked
-- [ ] Database migrations and OCDS sync tested against official releases
-- [ ] Search, detail, research, local state and reminders tested
-- [ ] Web deployment verified
-- [ ] Android APK built and smoke-tested
+## Setup
+1. `npm install`
+2. Copy `.env.example` to `.env.local`, then set `DATABASE_URL`. Do not commit credentials.
+3. `npm run db:init` (loads the SQL schema)
+4. `npm run sync:etenders` (7-day release window); use `npm run sync:30d` for a larger initial backfill.
+5. `npm run dev` to run the public web interface.
+6. `npm run typecheck`, `npm run test:ocds`, and `npm run build` to validate.
 
-**No functional or production readiness claims until each step has been verified.**
+For deployment, use Render (Node web app) and Neon (PostgreSQL). Run the importer as an isolated scheduled job and monitor `sync_runs` failures. The UI never substitutes mock tenders if the official feed is unavailable.
+
+## Key URLs
+- `/` — Today
+- `/search` — Find
+- `/research` — Research
+- `/tenders/[ocid]` — Full notice
+- `/saved` — Local watchlist
+- `/pipeline` — Local bid pipeline
+- `/calendar` — Closing deadlines, ICS downloads
+- `/alerts` — On-launch in-app alerts for saved deadlines
+- `/settings` — Preferences and source status
+- `/api/health`, `/api/tenders` — Server APIs
+
+## Sources and limitations
+Official publication: https://data.etenders.gov.za/Home/LearnMore
+
+Current importer endpoint: `https://ocds-api.etenders.gov.za/api/OCDSReleases`; the official Swagger page has been observed to return HTTP 404, so production source testing is mandatory. The dataset does not include every government procurement process. Fields absent in source data are labeled as not supplied. Documents link to URLs in official releases; missing URLs cannot be conjured.
+
+In-app alert reminders appear upon opening the app; **background Android notifications are not implemented**. This is intentional rather than a fake notification toggle. APK packaging and device testing remain future work.
+
+## Next release gates
+- [ ] GitHub CI passes on the committed tree.
+- [ ] Database provisioned and schema initialized.
+- [ ] Official eTenders importer verified against live API and initial 30-day backfill completed.
+- [ ] End-to-end browser tests on real imported records.
+- [ ] Hosting deployment and data sync schedule enabled.
+- [ ] Capacitor native Android packaging, notification support and APK smoke tests.
+
+No dummy data, demo buttons, paywalls, local municipal scrapers, or authentication.

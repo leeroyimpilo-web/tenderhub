@@ -5,6 +5,7 @@ import {getFacets,searchTenders} from '@/lib/tenders';
 import type {TenderFilter,TenderPage} from '@/lib/types';
 import {TenderCard} from '@/components/TenderCard';
 import {DataError,Empty} from '@/components/DataState';
+import {SearchPreference} from '@/components/SearchPreference';
 export const metadata:Metadata={title:'Find tenders'};
 export const dynamic='force-dynamic';
 type Params={q?:string;province?:string;category?:string;buyer?:string;status?:string;sort?:string;page?:string};
@@ -13,7 +14,7 @@ export default async function SearchPage({searchParams}:{searchParams:Params}){
  let result:TenderPage|null=null,facets:{provinces:string[];categories:string[]}={provinces:[],categories:[]};
  try{[result,facets]=await Promise.all([searchTenders(f),getFacets()])}catch(error){console.error('[find]',error)}
  const href=(page:number)=>{const p=new URLSearchParams();for(const [k,v] of Object.entries({...f,page})){if(v!==undefined&&v!==null&&String(v))p.set(k,String(v))}return '/search?'+p.toString()};
- return <main className="tb-v2-content">
+ return <main className="tb-v2-content"><SearchPreference/>
   <div className="flex gap-2 items-center"><span className="tb-v2-eyebrow">Official opportunities</span><SlidersHorizontal size={14} className="text-ink-3"/></div>
   <h1 className="tb-v2-heading mt-2">Find tenders</h1>
   <p className="tb-v2-muted mt-2">Search only notices stored from National Treasury eTenders OCDS releases.</p>
