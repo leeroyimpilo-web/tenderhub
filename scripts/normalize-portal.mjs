@@ -64,7 +64,7 @@ export function normalizePortalOpportunity(value){
   published_at:asDate(r.date_Published),
   closing_at:asDate(r.closing_Date),
   release_at:asDate(r.sysStartTime)??asDate(r.date_Published),
-  source_url:portalUrl,
+  source_url:(typeof r.id==='number' && Number.isInteger(r.id) ? official+'/Home/?id='+encodeURIComponent(String(r.id)) : portalUrl),
   documents:portalDocuments(r),raw:{...r,source:'National Treasury eTenders official opportunities'}
  };
 }
