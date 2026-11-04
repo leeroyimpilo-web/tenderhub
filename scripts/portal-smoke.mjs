@@ -6,5 +6,5 @@ try{
  console.log('OFFICIAL PORTAL HTTP '+response.status);
  if(!response.ok)throw new Error('Official portal data endpoint HTTP '+response.status+': '+body.slice(0,500));
  const parsed=JSON.parse(body);if(!Array.isArray(parsed.data))throw new Error('Missing data list; top-level keys: '+Object.keys(parsed).join(','));
- console.log(JSON.stringify({ok:true,source:'Official eTenders Opportunities JSON',recordsTotal:parsed.recordsTotal,recordsFiltered:parsed.recordsFiltered,count:parsed.data.length,firstKeys:Object.keys(parsed.data[0]??{}).slice(0,20)}));
+ console.log(JSON.stringify({ok:true,source:'Official eTenders Opportunities JSON',recordsTotal:parsed.recordsTotal,recordsFiltered:parsed.recordsFiltered,count:parsed.data.length,firstKeys:Object.keys(parsed.data[0]??{}),types:Object.fromEntries(Object.entries(parsed.data[0]??{}).map(([k,v])=>[k,Array.isArray(v)?'array':typeof v]))}));
 }catch(error){console.error('PORTAL PROBE FAILED:',String(error));process.exitCode=1}
