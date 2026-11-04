@@ -14,7 +14,8 @@
     "sync:etenders": "node scripts/sync-etenders.mjs",
     "sync:30d": "node scripts/sync-etenders.mjs --days=30",
     "test:ocds": "node --test tests/*.test.mjs",
-    "import:official": "node scripts/import-ocds-file.mjs"
+    "import:official": "node scripts/import-ocds-file.mjs",
+    "sync:portal": "node scripts/sync-etenders-portal.mjs"
   },
   "dependencies": {
     "lucide-react": "^0.468.0",

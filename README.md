@@ -39,7 +39,9 @@ For deployment, use Render (Node web app) and Neon (PostgreSQL). Run the importe
 ## Sources and limitations
 Official publication: https://data.etenders.gov.za/Home/LearnMore
 
-Current importer endpoint: `https://ocds-api.etenders.gov.za/api/OCDSReleases`; the official Swagger page returned HTTP 404, and a live API probe on 4 November 2026 returned HTTP 500 for multiple valid date windows (HTTP 400 without mandatory dates). The official bulk JSON import is the fallback; neither source has been successfully imported into a configured database yet. The dataset does not include every government procurement process. Fields absent in source data are labeled as not supplied. Documents link to URLs in official releases; missing URLs cannot be conjured.
+Official first-party opportunities endpoint (confirmed HTTP 200 on 4 November 2026): `https://www.etenders.gov.za/Home/PaginatedTenderOpportunities`. This is the same National Treasury eTenders portal, not separate municipal discovery or a commercial listing. Only currently advertised tenders are returned, so historical data still relies on OCDS/bulk files.
+
+Original OCDS importer endpoint: `https://ocds-api.etenders.gov.za/api/OCDSReleases`; the official Swagger page returned HTTP 404, and a live API probe on 4 November 2026 returned HTTP 500 for multiple valid date windows (HTTP 400 without mandatory dates). The official bulk JSON import is the fallback; neither source has been successfully imported into a configured database yet. The dataset does not include every government procurement process. Fields absent in source data are labeled as not supplied. Documents link to URLs in official releases; missing URLs cannot be conjured.
 
 In-app alert reminders appear upon opening the app; **background Android notifications are not implemented**. This is intentional rather than a fake notification toggle. APK packaging and device testing remain future work.
 

@@ -17,7 +17,7 @@ export default async function SearchPage({searchParams}:{searchParams:Params}){
  return <main className="tb-v2-content"><SearchPreference/>
   <div className="flex gap-2 items-center"><span className="tb-v2-eyebrow">Official opportunities</span><SlidersHorizontal size={14} className="text-ink-3"/></div>
   <h1 className="tb-v2-heading mt-2">Find tenders</h1>
-  <p className="tb-v2-muted mt-2">Search only notices stored from National Treasury eTenders OCDS releases.</p>
+  <p className="tb-v2-muted mt-2">Search only notices imported directly from National Treasury eTenders.</p>
   <form action="/search" method="get" className="tb-v2-panel mt-5">
    <div className="flex flex-col sm:flex-row gap-2"><label className="grow"><span className="tb-v2-label">Keywords or reference</span><input name="q" defaultValue={f.q} className="tb-v2-field" placeholder="Search title, buyer or reference"/></label><label className="grow"><span className="tb-v2-label">Buyer / department</span><input name="buyer" defaultValue={f.buyer} className="tb-v2-field" placeholder="Department name"/></label></div>
    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 mt-3">
