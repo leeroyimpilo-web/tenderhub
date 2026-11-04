@@ -42,7 +42,7 @@ export default async function Details({params}:{params:{id:string}}){
      <h2 className="font-semibold text-navy text-[17px] mb-3">Source & verification</h2>
      <p className="tb-v2-muted">OCDS ID: <span className="break-all">{t.id}</span></p>
      <p className="tb-v2-muted mt-2">Locally indexed: {fmtDate(t.synced_at)}</p>
-     <a href={t.source_url} target="_blank" rel="noreferrer" className="tb-v2-primary mt-4"><ExternalLink size={16}/> Open official OCDS record</a>
+     <a href="https://www.etenders.gov.za/Home/opportunities?id=1" target="_blank" rel="noreferrer" className="tb-v2-primary mt-4"><ExternalLink size={16}/> Open official eTenders portal</a>
      <p className="tb-v2-muted mt-3">Source information is provided by National Treasury and should be checked with the procuring entity.</p>
     </section>
    </div>
