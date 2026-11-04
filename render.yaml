@@ -1,0 +1,17 @@
+services:
+  - type: web
+    name: tenderhub-v2
+    runtime: node
+    plan: free
+    region: frankfurt
+    repo: https://github.com/leeroyimpilo-web/tenderhub
+    branch: main
+    autoDeployTrigger: checksPass
+    buildCommand: npm install --no-audit --no-fund && npm run build
+    startCommand: npm run start
+    healthCheckPath: /api/health
+    envVars:
+      - key: DATABASE_URL
+        sync: false
+      - key: NEXT_TELEMETRY_DISABLED
+        value: "1"

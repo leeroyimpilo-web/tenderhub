@@ -9,7 +9,7 @@ A new open-access South African tender intelligence MVP, using **only official N
 - Local device watchlist, bid pipeline notes/stages, calendar file export, in-app deadline alerts and preference storage.
 - PostgreSQL SQL schema, paginated official OCDS ingestion, source health endpoint, and normalization unit tests.
 
-**Important: these modules are committed but have not yet been verified in a deployed environment. No live tender feed or installable Android APK is claimed.** An actual DATABASE_URL, database initialization, successful official OCDS sync, CI checks, and live deployment are required before release.
+**Important: these modules are committed but have not yet been verified in a deployed environment. No live tender feed or installable Android APK is claimed.** Dedicated Neon `tenderhub-v2` database initialized and 2,020 genuine first-party eTenders opportunities imported and verified on 4 Nov 2026. Code checks passed, but continuous sync credentials, web deployment, end-to-end browser testing and Android build are still needed.
 
 ## Requirements
 Node 20+, a PostgreSQL database (Neon is supported), and network access to the official eTenders API.
@@ -48,10 +48,18 @@ In-app alert reminders appear upon opening the app; **background Android notific
 
 ## Next release gates
 - [ ] GitHub CI passes on the committed tree.
-- [ ] Database provisioned and schema initialized.
-- [ ] Official eTenders importer verified against live API and initial 30-day backfill completed.
+- [x] Database provisioned and schema initialized: Neon project `tenderhub-v2`, DB `tenderhub`.
+- [x] Official first-party opportunities endpoint verified, first 2,020 opportunity records imported and indexed (4 November 2026).
+- [ ] Official historical OCDS API restored/backfill verified (upstream API still returns HTTP 500).
 - [ ] End-to-end browser tests on real imported records.
 - [ ] Hosting deployment and data sync schedule enabled.
 - [ ] Capacitor native Android packaging, notification support and APK smoke tests.
 
 No dummy data, demo buttons, paywalls, local municipal scrapers, or authentication.
+
+## Prepared deployment and refresh
+- `render.yaml` is ready for a single no-login web service, using the existing Neon database (not creating a second database).
+- Render will prompt for `DATABASE_URL` privately at Blueprint creation. Copy the pooled connection string from the Neon `tenderhub-v2` project's `tenderhub` database, never paste it into GitHub source or chat.
+- The schedule in `.github/workflows/sync-live.yml` runs every 6 hours **only after** a GitHub Actions secret named `TENDERHUB_DATABASE_URL` is configured. Without it, the workflow announces the missing secret and does not sync.
+- Sync uses `npm run sync:portal`. For official OCDS archives, `npm run import:official -- archive.json` remains available.
+- Deployment & Android app are not yet complete. Source contact and document link extraction need end-to-end validation against real notices before shipping.
