@@ -65,3 +65,9 @@ export async function getFacets(){
   const r=await pool.query("SELECT array_remove(array_agg(DISTINCT province ORDER BY province),NULL) as provinces, array_remove(array_agg(DISTINCT category ORDER BY category),NULL) as categories FROM tenders");
   return {provinces:(r.rows[0]?.provinces??[]) as string[],categories:(r.rows[0]?.categories??[]) as string[]};
 }
+
+export async function getTendersByIds(ids:string[]):Promise<Tender[]>{
+ if(ids.length===0)return [];
+ const result=await getPool().query("SELECT * FROM tenders WHERE id=ANY($1::text[]) LIMIT 100",[ids]);
+ return result.rows.map(plain);
+}
