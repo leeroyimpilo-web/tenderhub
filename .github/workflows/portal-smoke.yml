@@ -1,0 +1,16 @@
+name: Official eTenders portal source probe
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+jobs:
+  portal-source:
+    runs-on: ubuntu-latest
+    timeout-minutes: 3
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Probe official portal JSON data
+        run: node scripts/portal-smoke.mjs
