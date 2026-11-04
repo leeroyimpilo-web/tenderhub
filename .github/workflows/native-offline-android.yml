@@ -47,6 +47,9 @@ jobs:
       - name: Compile native offline Android APK
         working-directory: native-android
         run: gradle :app:assembleDebug --no-daemon --stacktrace
+      - name: Android lint
+        working-directory: native-android
+        run: gradle :app:lintDebug --no-daemon
       - name: Check real bootstrap data inside APK
         run: |
           test -s native-android/app/build/outputs/apk/debug/app-debug.apk
@@ -59,3 +62,35 @@ jobs:
           name: TenderBase-Native-Redesign-debug
           path: native-android/app/build/outputs/apk/debug/app-debug.apk
           if-no-files-found: error
+
+  screenshots:
+    name: Capture native Android emulator screens
+    needs: native
+    if: github.ref == 'refs/heads/development/native-six-screen-ui'
+    runs-on: ubuntu-latest
+    timeout-minutes: 40
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/download-artifact@v4
+        with:
+          name: TenderBase-Native-Redesign-debug
+          path: native-apk
+      - name: Verify APK for emulator
+        run: test -s native-apk/app-debug.apk
+      - name: Capture actual offline native screens on emulator
+        uses: reactivecircus/android-emulator-runner@v2
+        with:
+          api-level: 35
+          arch: x86_64
+          profile: pixel_6
+          emulator-options: -no-snapshot -no-window -gpu swiftshader_indirect -noaudio -no-boot-anim
+          script: TENDERBASE_APK=native-apk/app-debug.apk python3 scripts/capture-native-screens.py
+      - name: Upload actual native app screenshots
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: TenderBase-Six-Native-Screens
+          path: native-screenshots/*.png
+          if-no-files-found: warn

@@ -5,6 +5,7 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.background
 import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material.icons.Icons
@@ -73,7 +74,12 @@ fun TenderApp(vm:TenderViewModel){
     BackHandler(selectedId!=null || settings){
         if(settings)settings=false else selectedId=null
     }
+    BoxWithConstraints(Modifier.fillMaxSize().background(TB.background)){
+        val appBounds=if(maxWidth>720.dp)
+            Modifier.align(Alignment.TopCenter).width(720.dp).fillMaxHeight()
+        else Modifier.fillMaxSize()
     Scaffold(
+        modifier=appBounds,
         containerColor=TB.background,
         contentWindowInsets=WindowInsets.safeDrawing,
         snackbarHost={SnackbarHost(snackbar)},
@@ -185,5 +191,5 @@ fun TenderApp(vm:TenderViewModel){
                 onTab={insightsTab=it},modifier=modifier
             )
         }
-    }
+        }
 }

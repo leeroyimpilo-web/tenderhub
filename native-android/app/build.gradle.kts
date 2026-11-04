@@ -8,7 +8,7 @@ android {
     namespace = "za.co.tenderbase.nativeoffline"
     compileSdk = 35
     defaultConfig {
-        applicationId = "za.co.tenderbase.nativeoffline"
+        applicationId = "za.co.tenderbase.nativeui"
         minSdk = 26
         targetSdk = 35
         versionCode = 2
