@@ -11,4 +11,11 @@ try{
  const first=parsed.data.find(row=>Array.isArray(row.supportDocument)&&row.supportDocument.length>0);
  const firstSupport=first?.supportDocument[0];
  console.log(JSON.stringify({ok:true,source:'Official eTenders Opportunities JSON',recordsTotal:parsed.recordsTotal,recordsFiltered:parsed.recordsFiltered,count:parsed.data.length,rowsWithSupportDocuments:docs.filter(x=>x.support>0).length,firstSupportKeys:firstSupport&&typeof firstSupport==='object'?Object.keys(firstSupport):[],firstSupportTypes:firstSupport&&typeof firstSupport==='object'?Object.fromEntries(Object.entries(firstSupport).map(([k,v])=>[k,Array.isArray(v)?'array':typeof v])):{},otherDocumentFieldTypes:Object.fromEntries(['supportDocument','biddersListDocument','esubRequiredDocuments'].map(k=>[k,Array.isArray(parsed.data[0]?.[k])?'array':typeof parsed.data[0]?.[k]]))}));
+ const firstId=parsed.data[0]?.id;
+ if(Number.isInteger(firstId)){
+  const detailUrl='https://www.etenders.gov.za/Home/?id='+encodeURIComponent(String(firstId));
+  const detail=await fetch(detailUrl,{signal:AbortSignal.timeout(30000),headers:{accept:'text/html','user-agent':'TenderBaseV2/0.1 source-link-check'}});
+  console.log(JSON.stringify({officialDetailLink:detail.status,contentType:detail.headers.get('content-type'),recordId:firstId}));
+  if(!detail.ok)throw new Error('Official notice deep link HTTP '+detail.status);
+ }
 }catch(error){console.error('PORTAL PROBE FAILED:',String(error));process.exitCode=1}
