@@ -1,18 +1,16 @@
 import Link from 'next/link';
-import {CalendarClock,MapPin,Building2,ArrowUpRight} from 'lucide-react';
+import {CalendarClock,MapPin,Building2,Bookmark} from 'lucide-react';
 import type {Tender} from '@/lib/types';
 import {fmtDate,tenderStatus} from '@/lib/format';
 import {SaveButton,TrackButton} from '@/components/TenderActions';
-export function TenderCard({tender}:{tender:Tender}){
+export function TenderCard({tender,highlighted=false,match}:{tender:Tender;highlighted?:boolean;match?:string}){
  const status=tenderStatus(tender.closing_at);
- return <article className="tb-v2-panel">
-  <div className="flex flex-wrap gap-2 justify-between items-center mb-3"><span className={'tb-v2-badge '+(status==='Open'?'open':status==='Closed'?'closed':'')}>{status}</span><span className="text-[11px] text-ink-3">{tender.reference??tender.id}</span></div>
-  <Link href={'/tenders/'+encodeURIComponent(tender.id)} className="text-[15px] font-semibold text-navy leading-snug hover:underline flex gap-2 justify-between">{tender.title}<ArrowUpRight size={16} className="shrink-0"/></Link>
-  <div className="mt-3 flex flex-wrap gap-x-4 gap-y-1 text-[11px] text-ink-2">
-   <span className="inline-flex items-center gap-1"><Building2 size={13}/>{tender.buyer??'Buyer not supplied'}</span>
-   {tender.province&&<span className="inline-flex items-center gap-1"><MapPin size={13}/>{tender.province}</span>}
-   <span className="inline-flex items-center gap-1"><CalendarClock size={13}/>Closes {fmtDate(tender.closing_at)}</span>
-  </div>
-  <div className="mt-4 flex flex-wrap gap-2"><SaveButton tender={tender}/><TrackButton tender={tender}/></div>
+ return <article className={'tb-tender-card '+(highlighted?'highlighted':'')}>
+  <div className="tb-card-category">{(tender.category??'Tender notice').toUpperCase()}</div><SaveButton tender={tender} compact/>
+  <Link href={'/tenders/'+encodeURIComponent(tender.id)} className="tb-card-title">{tender.title}</Link>
+  <p className="tb-card-buyer">{tender.buyer??'Buyer not supplied'}</p><p className="tb-card-province">{tender.province??'Province not supplied'}</p>
+  <div className="tb-card-deadline"><strong>{tender.closing_at?new Date(tender.closing_at).toLocaleDateString('en-ZA',{day:'2-digit',month:'short'}).toUpperCase():'DATE TBC'}</strong><span>Closes {fmtDate(tender.closing_at)}</span></div>
+  {match&&<div className="tb-card-match">Matches “{match}”{tender.province?' · '+tender.province:''}</div>}
+  {!match&&<div className="tb-card-actions"><TrackButton tender={tender}/></div>}
  </article>;
 }

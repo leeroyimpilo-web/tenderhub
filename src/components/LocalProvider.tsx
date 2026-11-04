@@ -1,14 +1,15 @@
 'use client';
 import {createContext,useCallback,useContext,useEffect,useRef,useState} from 'react';
-import type {LocalData,LocalSettings,PipelineRecord,PipelineStage,Tender} from '@/lib/types';
+import type {LocalData,LocalSearch,LocalSettings,PipelineRecord,PipelineStage,Tender} from '@/lib/types';
 const KEY='tenderbase-v2-local-v1';
 type SyncState='idle'|'checking'|'updated'|'offline';
-const defaults:LocalData={saved:[],pipeline:[],dismissedAlerts:[],settings:{defaultProvince:'',remindDays:7}};
+const defaults:LocalData={saved:[],pipeline:[],dismissedAlerts:[],savedSearches:[],settings:{defaultProvince:'',remindDays:7,industries:[],keywords:[],onboardingComplete:false}};
 type Store={
  data:LocalData;ready:boolean;syncState:SyncState;refreshSaved:()=>Promise<void>;isSaved:(id:string)=>boolean;isTracked:(id:string)=>boolean;
  toggleSaved:(t:Tender)=>void;addPipeline:(t:Tender)=>void;removePipeline:(id:string)=>void;
  setStage:(id:string,stage:PipelineStage)=>void;setNotes:(id:string,notes:string)=>void;
  dismissAlert:(id:string)=>void;resetAlerts:()=>void;updateSettings:(value:Partial<LocalSettings>)=>void;
+ saveSearch:(search:Omit<LocalSearch,'id'>)=>void;removeSearch:(id:string)=>void;renameSearch:(id:string,name:string)=>void;
 };
 const Context=createContext<Store|null>(null);
 function stripTender(t:Tender):Tender{return {...t,raw:{},documents:t.documents??[]}}
@@ -27,7 +28,8 @@ export function LocalProvider({children}:{children:React.ReactNode}){
         saved:Array.isArray(v.saved)?v.saved:[],
         pipeline:Array.isArray(v.pipeline)?v.pipeline:[],
         dismissedAlerts:Array.isArray(v.dismissedAlerts)?v.dismissedAlerts:[],
-        settings:{...defaults.settings,...v.settings}
+        savedSearches:Array.isArray(v.savedSearches)?v.savedSearches:[],
+        settings:{...defaults.settings,...v.settings,industries:Array.isArray(v.settings?.industries)?v.settings.industries:[],keywords:Array.isArray(v.settings?.keywords)?v.settings.keywords:[]}
       };
       ref.current=restored;setData(restored);
     }
@@ -78,7 +80,10 @@ export function LocalProvider({children}:{children:React.ReactNode}){
   setNotes:(id,notes)=>change(d=>({...d,pipeline:d.pipeline.map(p=>p.tender.id===id?{...p,notes,updatedAt:new Date().toISOString()}:p)})),
   dismissAlert:(id)=>change(d=>{const t=d.saved.find(x=>x.id===id);const key=id+'|'+(t?.closing_at??'');return {...d,dismissedAlerts:d.dismissedAlerts.includes(key)?d.dismissedAlerts:[...d.dismissedAlerts,key]}}),
   resetAlerts:()=>change(d=>({...d,dismissedAlerts:[]})),
-  updateSettings:(settings)=>change(d=>({...d,settings:{...d.settings,...settings}}))
+  updateSettings:(settings)=>change(d=>({...d,settings:{...d.settings,...settings}})),
+  saveSearch:(search)=>change(d=>({...d,savedSearches:[{...search,id:crypto.randomUUID()},...d.savedSearches]})),
+  removeSearch:(id)=>change(d=>({...d,savedSearches:d.savedSearches.filter(s=>s.id!==id)})),
+  renameSearch:(id,name)=>change(d=>({...d,savedSearches:d.savedSearches.map(s=>s.id===id?{...s,name}:s)}))
  };
  return <Context.Provider value={value}>{children}</Context.Provider>;
 }

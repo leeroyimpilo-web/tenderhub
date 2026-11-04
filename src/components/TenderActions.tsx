@@ -4,10 +4,10 @@ import {Bookmark,BookmarkCheck,KanbanSquare,CalendarDays,Share2,Check} from 'luc
 import {useLocal} from '@/components/LocalProvider';
 import {toICS} from '@/lib/format';
 import type {Tender} from '@/lib/types';
-export function SaveButton({tender}:{tender:Tender}){
+export function SaveButton({tender,compact=false}:{tender:Tender;compact?:boolean}){
  const {ready,isSaved,toggleSaved}=useLocal();
  const saved=isSaved(tender.id);
- return <button type="button" disabled={!ready} onClick={()=>toggleSaved(tender)} className="tb-v2-secondary" aria-pressed={saved}>{saved?<BookmarkCheck size={16}/>:<Bookmark size={16}/>} {saved?'Saved':'Save'}</button>;
+ return <button type="button" disabled={!ready} onClick={()=>toggleSaved(tender)} className={compact?'tb-card-bookmark':'tb-v2-secondary'} aria-label={saved?'Remove saved tender':'Save tender'} aria-pressed={saved}>{saved?<BookmarkCheck size={19}/>:<Bookmark size={19}/>} {!compact&&(saved?'Saved':'Save')}</button>;
 }
 export function TrackButton({tender}:{tender:Tender}){
  const {ready,isTracked,addPipeline}=useLocal();const tracked=isTracked(tender.id);

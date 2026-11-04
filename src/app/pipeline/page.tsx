@@ -1,25 +1,14 @@
 'use client';
 import Link from 'next/link';
-import {KanbanSquare,Trash2,ArrowUpRight,CheckCircle2} from 'lucide-react';
+import {useState} from 'react';
+import {ArrowUpRight,Trash2} from 'lucide-react';
 import {useLocal} from '@/components/LocalProvider';
 import {STAGES,PipelineStage} from '@/lib/types';
 import {fmtDate} from '@/lib/format';
 export default function Pipeline(){
- const {data,ready,setStage,setNotes,removePipeline}=useLocal();
- return <main className="tb-v2-content">
-  <p className="tb-v2-eyebrow">Bid management</p><h1 className="tb-v2-heading mt-2">Pipeline</h1>
-  <p className="tb-v2-muted mt-2">Manage stages and private notes on this device. Changes save automatically.</p>
-  {!ready?<div className="tb-v2-nodata mt-6">Loading your pipeline…</div>:!data.pipeline.length?
-   <div className="tb-v2-nodata mt-6"><KanbanSquare className="mx-auto mb-3" size={24}/>No tenders being tracked.<div className="mt-4"><Link className="tb-v2-primary" href="/search">Find an opportunity</Link></div></div>:
-   <div className="tb-v2-list mt-6">{data.pipeline.map(({tender,stage,notes,updatedAt})=><article key={tender.id} className="tb-v2-panel">
-    <p className="tb-v2-eyebrow">{tender.reference??tender.id}</p>
-    <Link href={'/tenders/'+encodeURIComponent(tender.id)} className="block text-[16px] font-semibold text-navy mt-2 hover:underline">{tender.title} <ArrowUpRight size={15} className="inline"/></Link>
-    <p className="tb-v2-muted mt-2">{tender.buyer??'No buyer supplied'} · Closes {fmtDate(tender.closing_at)}</p>
-    <div className="grid grid-cols-1 md:grid-cols-2 gap-3 mt-4">
-     <label><span className="tb-v2-label">Bid stage</span><select className="tb-v2-field" value={stage} onChange={e=>setStage(tender.id,e.target.value as PipelineStage)}>{STAGES.map(s=><option key={s} value={s}>{s}</option>)}</select></label>
-     <label><span className="tb-v2-label">Your notes (autosaved)</span><textarea className="tb-v2-field min-h-[82px]" rows={3} placeholder="Bid preparation notes" value={notes} onChange={e=>setNotes(tender.id,e.target.value)}/></label>
-    </div>
-    <div className="flex flex-wrap items-center justify-between gap-3 mt-3"><span className="text-[11px] text-ink-3 flex items-center gap-1"><CheckCircle2 size={13}/> Saved on device · {fmtDate(updatedAt)}</span><button type="button" className="tb-v2-secondary" onClick={()=>{if(window.confirm('Remove this tender from your pipeline?'))removePipeline(tender.id)}}><Trash2 size={15}/> Remove</button></div>
-   </article>)}</div>}
- </main>;
+ const {data,ready,setStage,setNotes,removePipeline,toggleSaved}=useLocal();const [tab,setTab]=useState<'saved'|'tracking'>('saved');
+ return <main className="tb-page-content"><h1 className="tb-page-title">My bids</h1><p className="tb-page-subtitle">From shortlist to submission.</p>
+  <div className="tb-segmented"><button className={tab==='saved'?'active':''} onClick={()=>setTab('saved')}>Saved {data.saved.length}</button><button className={tab==='tracking'?'active':''} onClick={()=>setTab('tracking')}>Tracking {data.pipeline.length}</button></div><p className="tb-helper">Stages and notes stay on this device.</p>
+  {!ready?<div className="tb-empty-inline">Loading your bids…</div>:tab==='saved'?(data.saved.length?<div className="tb-bid-list">{data.saved.map(t=><article className="tb-bid-card" key={t.id}><p className="tb-card-ref">{t.reference??t.id}</p><Link className="tb-bid-title" href={'/tenders/'+encodeURIComponent(t.id)}>{t.title}</Link><p className="tb-card-province">{t.buyer??'Buyer not supplied'}{t.province?' · '+t.province:''}</p><p className="tb-card-province">Closes {fmtDate(t.closing_at)}</p><div className="tb-bid-actions"><Link href={'/tenders/'+encodeURIComponent(t.id)}>Open tender <ArrowUpRight size={16}/></Link><button onClick={()=>toggleSaved(t)} aria-label="Remove saved tender"><Trash2 size={17}/></button></div></article>)}</div>:<div className="tb-empty-inline">No tenders saved yet.<Link href="/">Discover opportunities →</Link></div>):(data.pipeline.length?<div className="tb-bid-list">{data.pipeline.map(({tender,stage,notes})=><article key={tender.id} className="tb-bid-card tracking"><div className="tb-tracking-top"><p className="tb-card-ref">{tender.reference??tender.id}</p><button aria-label="Remove from tracking" onClick={()=>removePipeline(tender.id)}><Trash2 size={18}/></button></div><Link href={'/tenders/'+encodeURIComponent(tender.id)} className="tb-bid-title">{tender.title}</Link><p className="tb-card-province">Closes {fmtDate(tender.closing_at)}</p><label className="tb-bid-field"><span>Bid stage</span><select value={stage} onChange={e=>setStage(tender.id,e.target.value as PipelineStage)}>{STAGES.map(s=><option key={s}>{s}</option>)}</select></label><label className="tb-bid-field"><span>Preparation notes</span><textarea value={notes} onChange={e=>setNotes(tender.id,e.target.value)} placeholder="Plan next steps and supplier notes" rows={3}/></label><div className="tb-saved-confirm">✓ Saved on this device</div><Link href={'/tenders/'+encodeURIComponent(tender.id)} className="tb-bid-open">Open tender ↗</Link></article>)}</div>:<div className="tb-empty-inline">No tenders being tracked yet.<Link href="/">Find opportunities →</Link></div>)}
+ </main>
 }

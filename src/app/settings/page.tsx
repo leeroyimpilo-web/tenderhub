@@ -3,6 +3,7 @@ import {useCallback,useEffect,useState} from 'react';
 import {Database,RefreshCcw,CheckCircle2,AlertTriangle,ExternalLink} from 'lucide-react';
 import {useLocal} from '@/components/LocalProvider';
 import {fmtDate} from '@/lib/format';
+import Link from 'next/link';
 type Health={ok:boolean;count?:number;lastSync?:string|null;error?:string};
 const provinces=['Eastern Cape','Free State','Gauteng','KwaZulu-Natal','Limpopo','Mpumalanga','North West','Northern Cape','Western Cape'];
 export default function Settings(){
@@ -25,6 +26,7 @@ export default function Settings(){
     <label><span className="tb-v2-label">In-app alert window</span><select className="tb-v2-field" value={data.settings.remindDays} onChange={e=>updateSettings({remindDays:Number(e.target.value)})}><option value={1}>1 day before closing</option><option value={3}>3 days</option><option value={7}>7 days</option><option value={14}>14 days</option><option value={30}>30 days</option></select></label>
    </div>}
    <p className="tb-v2-muted mt-3">Settings save immediately. Find applies your default province when it opens without existing filters.</p>
+   <Link href="/onboarding" className="tb-v2-secondary mt-4">Edit work and area preferences</Link>
   </section>
   <section className="tb-v2-panel mt-4">
    <div className="tb-v2-topbar"><h2 className="font-semibold text-navy flex items-center gap-2"><Database size={18}/> Official data status</h2><button type="button" className="tb-v2-secondary" disabled={checking} onClick={()=>void check()}><RefreshCcw size={15}/>{checking?'Checking…':'Recheck'}</button></div>

@@ -5,5 +5,6 @@ export interface TenderPage { items:Tender[];total:number;page:number;pages:numb
 export type PipelineStage='New match'|'Review'|'Bid planning'|'Preparing'|'Ready to submit'|'Submitted'|'Award pending'|'Won'|'Lost';
 export const STAGES:PipelineStage[]=['New match','Review','Bid planning','Preparing','Ready to submit','Submitted','Award pending','Won','Lost'];
 export interface PipelineRecord { tender:Tender;stage:PipelineStage;notes:string;updatedAt:string }
-export interface LocalSettings { defaultProvince:string;remindDays:number }
-export interface LocalData {saved:Tender[];pipeline:PipelineRecord[];dismissedAlerts:string[];settings:LocalSettings}
+export interface LocalSearch { id:string;name:string;q:string;province:string;category:string;buyer:string;status:string;sort:string }
+export interface LocalSettings { defaultProvince:string;remindDays:number;industries:string[];keywords:string[];onboardingComplete:boolean }
+export interface LocalData {saved:Tender[];pipeline:PipelineRecord[];dismissedAlerts:string[];savedSearches:LocalSearch[];settings:LocalSettings}
