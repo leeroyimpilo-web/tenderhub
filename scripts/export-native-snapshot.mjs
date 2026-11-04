@@ -34,7 +34,8 @@ for(let page=1;page<=250;page++){
    id:String(t.id),reference:t.reference??null,title:String(t.title),
    description:t.description??null,buyer:t.buyer??null,province:t.province??null,
    category:t.category??null,status:t.status??null,
-   published_at:t.published_at??null,closing_at:t.closing_at??null,
+   published_at:t.raw?.date_Published??t.published_at??null,
+   closing_at:t.raw?.closing_Date??t.closing_at??null,
    release_at:t.release_at??null,source_url:t.source_url,
    documents:(t.documents??[]).filter(d=>/^https:\/\//.test(d.url||'')).map(d=>({
     id:String(d.id??''),title:String(d.title??'Document'),

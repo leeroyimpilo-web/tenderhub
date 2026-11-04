@@ -84,6 +84,6 @@ fun BrandWordmark(){
     Row(verticalAlignment=Alignment.CenterVertically,horizontalArrangement=Arrangement.spacedBy(4.dp)){
         BrandMark()
         Text("tenderbase",style=MaterialTheme.typography.titleLarge,
-            fontWeight=FontWeight.ExtraBold,letterSpacing=(-.75).sp)
+            fontWeight=FontWeight.ExtraBold,letterSpacing=(-0.75).sp)
     }
 }

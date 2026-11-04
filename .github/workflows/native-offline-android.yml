@@ -1,7 +1,7 @@
 name: TenderBase Native Offline Android
 on:
   push:
-    branches: [development/native-offline-v1]
+    branches: [development/native-offline-v1, development/native-six-screen-ui]
     paths:
       - native-android/**
       - scripts/export-native-snapshot.mjs
@@ -35,6 +35,14 @@ jobs:
         run: |
           test -s native-android/app/src/main/assets/bootstrap.tenderpack
           node -e "const m=require('./native-android/app/src/main/assets/snapshot-info.json');if(m.count<1000)process.exit(1);console.log('Records packaged: '+m.count)"
+      - name: Bundle open-source Manrope font
+        run: |
+          mkdir -p native-android/app/src/main/res/font
+          curl -fsSL --retry 3 'https://raw.githubusercontent.com/google/fonts/main/ofl/manrope/Manrope%5Bwght%5D.ttf' -o native-android/app/src/main/res/font/manrope.ttf
+          echo 'd0639be45d0af36e798172419d7bd173c4bd4f29e2b76cbb69db1d11bf8b0a40  native-android/app/src/main/res/font/manrope.ttf' | sha256sum -c -
+      - name: Run native unit tests
+        working-directory: native-android
+        run: gradle :app:testDebugUnitTest --no-daemon --stacktrace
       - name: Compile native offline Android APK
         working-directory: native-android
         run: gradle :app:assembleDebug --no-daemon --stacktrace
@@ -47,6 +55,6 @@ jobs:
       - name: Upload native offline APK
         uses: actions/upload-artifact@v4
         with:
-          name: TenderBase-Native-Offline-debug
+          name: TenderBase-Native-Redesign-debug
           path: native-android/app/build/outputs/apk/debug/app-debug.apk
           if-no-files-found: error

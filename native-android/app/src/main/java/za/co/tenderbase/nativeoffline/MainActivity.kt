@@ -44,6 +44,7 @@ fun TenderApp(vm:TenderViewModel){
     var settings by rememberSaveable {mutableStateOf(false)}
     var query by rememberSaveable {mutableStateOf("")}
     var province by rememberSaveable {mutableStateOf("")}
+    var initialDefaultApplied by rememberSaveable {mutableStateOf(false)}
     var category by rememberSaveable {mutableStateOf("")}
     var buyer by rememberSaveable {mutableStateOf("")}
     var deadline by rememberSaveable {mutableStateOf("open")}
@@ -51,6 +52,12 @@ fun TenderApp(vm:TenderViewModel){
     var bidsTab by rememberSaveable {mutableStateOf("Saved")}
     var deadlineTab by rememberSaveable {mutableStateOf("Upcoming")}
     var insightsTab by rememberSaveable {mutableStateOf("Provinces")}
+    LaunchedEffect(pref["defaultProvince"]){
+        if(!initialDefaultApplied && !pref["defaultProvince"].isNullOrBlank()){
+            province=pref["defaultProvince"]?:""
+            initialDefaultApplied=true
+        }
+    }
     val scroll=rememberLazyListState()
     val selected=all.firstOrNull{it.id==selectedId}
     val filters=SearchCriteria(query,province,category,buyer,deadline,sort)
@@ -125,17 +132,22 @@ fun TenderApp(vm:TenderViewModel){
             }
             settings->SettingsScreen(
                 count=all.size,lastSync=sync,all=all,preferences=pref,
-                onSet=vm::setting,modifier=modifier
+                onSet={name,value->
+                    vm.setting(name,value)
+                    if(name=="defaultProvince"){province=value;initialDefaultApplied=true}
+                },modifier=modifier
             )
             destination=="Discover"->DiscoverScreen(
                 all=all,filters=filters,saved=saved,lastSync=sync,
                 onQuery={query=it},
                 onApply={f->
+                    initialDefaultApplied=true
                     province=f.province;category=f.category;buyer=f.buyer
                     deadline=f.status;sort=f.sort
                     scroll.requestScrollToItem(0)
                 },
                 onRemove={field->
+                    initialDefaultApplied=true
                     when(field){
                         "province"->province=""
                         "category"->category=""

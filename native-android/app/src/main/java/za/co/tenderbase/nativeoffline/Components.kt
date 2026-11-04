@@ -197,16 +197,20 @@ fun addToCalendar(context:Context,t:Tender){
     if(instant==null){
         Toast.makeText(context,"Closing date not supplied",Toast.LENGTH_SHORT).show();return
     }
-    val start=instant.toEpochMilli()
+    val timed=sourceHasTime(t.closingAt)
+    val eventStart=if(timed)instant.toEpochMilli() else
+        closingDate(t.closingAt)!!.atStartOfDay(ZoneId.of("UTC")).toInstant().toEpochMilli()
     val intent=Intent(Intent.ACTION_INSERT).apply{
         data=CalendarContract.Events.CONTENT_URI
         putExtra(CalendarContract.Events.TITLE,"Tender closes: "+t.title)
         putExtra(CalendarContract.Events.DESCRIPTION,
             "Reference: "+(t.reference?:"Not supplied")+"\n"+t.sourceUrl)
-        putExtra(CalendarContract.EXTRA_EVENT_BEGIN_TIME,start)
-        // End time represents duration of the calendar event, not an invented tender deadline.
-        putExtra(CalendarContract.EXTRA_EVENT_END_TIME,start+30*60_000L)
-        putExtra(CalendarContract.Events.EVENT_TIMEZONE,"Africa/Johannesburg")
+        putExtra(CalendarContract.EXTRA_EVENT_BEGIN_TIME,eventStart)
+        putExtra(CalendarContract.EXTRA_EVENT_END_TIME,
+            eventStart+if(timed)30*60_000L else 24*60*60_000L)
+        putExtra(CalendarContract.Events.ALL_DAY,!timed)
+        putExtra(CalendarContract.Events.EVENT_TIMEZONE,
+            if(timed)"Africa/Johannesburg" else "UTC")
     }
     try{context.startActivity(intent)}
     catch(_:Exception){Toast.makeText(context,"No calendar app installed",Toast.LENGTH_SHORT).show()}
