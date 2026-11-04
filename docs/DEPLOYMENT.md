@@ -9,6 +9,16 @@ This project is an **open-access, no-login, no-payment** MVP. It uses official N
 - Next.js TypeScript/build and official-source parser tests passed.
 - Playwright end-to-end test passed with a temporary database seeded from real official opportunities: [run 41892830838](https://github.com/leeroyimpilo-web/tenderhub/actions/runs/41892830838).
 
+## Render repository-access blocker (confirmed)
+
+Render's connected **My Workspace** could not fetch `https://github.com/leeroyimpilo-web/tenderhub`; its attempt to create the service returned HTTP 400 (`repository URL invalid or unfetchable`). No service was created. The repo exists and is public, so check Render's installed GitHub App **Repository access** settings before retrying:
+
+1. Open https://github.com/apps/render/installations/new while signed in to GitHub as `leeroyimpilo-web`.
+2. Configure/install the Render app and grant it access to **tenderhub** (select just this repository if preferred).
+3. Save the installation settings, then proceed with the Blueprint link below.
+
+Render's official connection guide: https://render.com/docs/git-provider
+
 ## Deploy the web backend (required for APK)
 1. Open Render Blueprint: https://dashboard.render.com/blueprint/new?repo=https://github.com/leeroyimpilo-web/tenderhub
 2. Sign in to Render, select your intended workspace, and authorize GitHub repository access if requested. **Do not reuse or modify existing services.**
