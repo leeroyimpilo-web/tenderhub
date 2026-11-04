@@ -1,15 +1,15 @@
 'use client';
 import {useState} from 'react';
 import Link from 'next/link';
-import {Bookmark,Search,Trash2,KanbanSquare,ExternalLink} from 'lucide-react';
+import {Bookmark,Search,Trash2,KanbanSquare,ExternalLink,RefreshCw} from 'lucide-react';
 import {useLocal} from '@/components/LocalProvider';
 import {fmtDate,tenderStatus} from '@/lib/format';
 export default function Saved(){
- const {data,ready,toggleSaved,addPipeline,isTracked}=useLocal();const [q,setQ]=useState('');
+ const {data,ready,toggleSaved,addPipeline,isTracked,syncState,refreshSaved}=useLocal();const [q,setQ]=useState('');
  const items=data.saved.filter(t=>(t.title+' '+t.reference+' '+t.buyer).toLowerCase().includes(q.toLowerCase()));
  return <main className="tb-v2-content">
   <p className="tb-v2-eyebrow">Your watchlist</p><h1 className="tb-v2-heading mt-2">Saved tenders</h1>
-  <p className="tb-v2-muted mt-2">Stored locally on this device. No login or cloud account required.</p>
+  <p className="tb-v2-muted mt-2">Stored locally on this device. No login or cloud account required.</p><div className="flex items-center gap-3 flex-wrap mt-3"><span role="status" className="tb-v2-muted">{syncState==='checking'?'Checking your tender deadlines…':syncState==='updated'?'Saved notices checked against live data.':syncState==='offline'?'Offline — showing last saved notices.':'Save a notice to start tracking updates.'}</span><button type="button" className="tb-v2-secondary" disabled={!ready||syncState==='checking'||!data.saved.length} onClick={()=>void refreshSaved()}><RefreshCw size={15}/> Refresh saved</button></div>
   {!ready?<div className="tb-v2-nodata mt-5">Loading on-device data…</div>:<>
   <label className="block mt-5"><span className="tb-v2-label">Find a saved tender</span><div className="flex gap-2"><input className="tb-v2-field" value={q} onChange={e=>setQ(e.target.value)} placeholder="Search your watchlist"/><span className="tb-v2-secondary" aria-hidden><Search size={18}/></span></div></label>
   <p className="tb-v2-muted my-4">{items.length} of {data.saved.length} saved tender(s)</p>
