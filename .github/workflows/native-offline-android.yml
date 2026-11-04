@@ -39,7 +39,8 @@ jobs:
         run: |
           mkdir -p native-android/app/src/main/res/font
           curl -fsSL --retry 3 'https://raw.githubusercontent.com/google/fonts/main/ofl/manrope/Manrope%5Bwght%5D.ttf' -o native-android/app/src/main/res/font/manrope.ttf
-          echo 'd0639be45d0af36e798172419d7bd173c4bd4f29e2b76cbb69db1d11bf8b0a40  native-android/app/src/main/res/font/manrope.ttf' | sha256sum -c -
+          test "$(git hash-object native-android/app/src/main/res/font/manrope.ttf)" = '75274da58537d6123b14f2cd0c355ad4681fc2b3'
+          curl -fsSL --retry 3 'https://raw.githubusercontent.com/google/fonts/main/ofl/manrope/OFL.txt' -o native-android/app/src/main/assets/MANROPE-OFL.txt
       - name: Run native unit tests
         working-directory: native-android
         run: gradle :app:testDebugUnitTest --no-daemon --stacktrace
