@@ -1,10 +1,11 @@
 # TenderBase V2 — TenderHub
 
-A new open-access South African tender intelligence MVP, using **only official National Treasury eTenders OCDS releases**. No account, authentication, payments, subscriptions, or separate municipal crawling.
+A new open-access South African tender intelligence MVP, using **only official National Treasury eTenders data** (OCDS releases and the first-party eTenders opportunities endpoint). No account, authentication, payments, subscriptions, or separate municipal crawling.
 
 ## Implemented source modules
 - Original TenderBase navy/Poppins/Tailwind visual tokens and responsive navigation.
 - Server-backed Today, Find (real SQL filters + pagination), Research, tender details and documents.
+- First-party eTenders portal importer tested as reachable (HTTP 200) and an OCDS bulk-file fallback for unstable OCDS API availability.
 - Local device watchlist, bid pipeline notes/stages, calendar file export, in-app deadline alerts and preference storage.
 - PostgreSQL SQL schema, paginated official OCDS ingestion, source health endpoint, and normalization unit tests.
 
