@@ -11,3 +11,10 @@ test('normalizes a first-party eTenders opportunity fixture',()=>{
 });
 test('does not fabricate missing IDs',()=>assert.equal(normalizePortalOpportunity({description:'Missing ID'}),null));
 test('rejects malformed official portal pages',()=>assert.throws(()=>validatePortalPage({releases:[]})));
+
+test('resolves current portal document metadata into official download URL',()=>{
+ const t=normalizePortalOpportunity({id:42,description:'Fixture',supportDocument:[{supportDocumentID:'e3b7c098-775a-4f54-bc18-fd4cef5b1da3',extension:'.pdf',fileName:'Specifications.pdf'}]});
+ assert.equal(t.documents.length,1);
+ assert.match(t.documents[0].url,/blobName=e3b7c098-775a-4f54-bc18-fd4cef5b1da3.pdf/);
+ assert.match(t.documents[0].url,/downloadedFileName=Specifications.pdf/);
+});

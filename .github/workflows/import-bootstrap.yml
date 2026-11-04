@@ -3,6 +3,7 @@ on:
   push:
     paths:
       - .github/workflows/import-bootstrap.yml
+      - scripts/normalize-portal.mjs
   workflow_dispatch:
 jobs:
   official-source:

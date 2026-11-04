@@ -1,0 +1,16 @@
+const url=new URL('https://www.etenders.gov.za/Home/PaginatedTenderOpportunities');
+Object.entries({draw:'1',start:'0',length:'10',status:'1','search[value]':'','search[regex]':'false'}).forEach(([k,v])=>url.searchParams.set(k,v));
+const page=await fetch(url,{signal:AbortSignal.timeout(30000),headers:{accept:'application/json','x-requested-with':'XMLHttpRequest',referer:'https://www.etenders.gov.za/Home/opportunities?id=1'}});
+if(!page.ok)throw new Error('Official listing HTTP '+page.status);
+const body=await page.json();
+const list=(body.data??[]).flatMap(r=>Array.isArray(r.supportDocument)?r.supportDocument:[]);
+if(!list.length)throw new Error('No document metadata returned');
+const d=list.find(x=>x.supportDocumentID&&x.extension&&x.fileName);
+if(!d)throw new Error('No complete doc metadata');
+const download=new URL('https://www.etenders.gov.za/home/Download/');
+download.searchParams.set('blobName',d.supportDocumentID+d.extension);download.searchParams.set('downloadedFileName',d.fileName);
+const response=await fetch(download,{method:'GET',signal:AbortSignal.timeout(45000),headers:{range:'bytes=0-10',accept:'application/pdf,application/octet-stream,*/*'}});
+const type=response.headers.get('content-type');const disposition=response.headers.get('content-disposition');
+if(response.body)await response.body.cancel();
+console.log(JSON.stringify({http:response.status,contentType:type,hasDisposition:!!disposition,blobSuffix:d.extension,valid:response.ok && !(type??'').includes('text/html')}));
+if(!response.ok||(type??'').includes('text/html'))process.exitCode=1;
