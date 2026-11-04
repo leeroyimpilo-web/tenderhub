@@ -128,7 +128,7 @@ fun DeadlinesScreen(all:List<Tender>,alerts:List<Tender>,dismissed:List<String>,
 private fun FilterDay(label:String,active:Boolean,onClick:()->Unit){
     if(active)Button(onClick=onClick,contentPadding=PaddingValues(horizontal=12.dp),
         modifier=Modifier.heightIn(min=44.dp)){
-        Text(label)
+        Text(label,color=androidx.compose.ui.graphics.Color.White)
     }else OutlinedButton(onClick=onClick,contentPadding=PaddingValues(horizontal=12.dp),
         modifier=Modifier.heightIn(min=44.dp)){
         Text(label)
