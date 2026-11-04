@@ -5,6 +5,7 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
@@ -20,6 +21,9 @@ import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.unit.dp
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.withContext
 
 @Composable
 fun DiscoverScreen(
@@ -30,7 +34,14 @@ fun DiscoverScreen(
 ){
     var sheet by remember { mutableStateOf(false) }
     val focus=LocalFocusManager.current
-    val results=remember(all,filters){searchOffline(all,filters)}
+    // Keep search/sort work away from Compose's UI thread; rapid typing cancels obsolete searches.
+    var results by remember { mutableStateOf<List<Tender>?>(null) }
+    LaunchedEffect(all,filters){
+        delay(120)
+        val next=withContext(Dispatchers.Default){searchOffline(all,filters)}
+        results=next
+    }
+    val rendered=results
     LazyColumn(modifier.fillMaxSize().testTag("discover-screen"),state=scrollState,
         contentPadding=PaddingValues(start=20.dp,end=20.dp,bottom=28.dp),
         verticalArrangement=Arrangement.spacedBy(0.dp)){
@@ -98,7 +109,7 @@ fun DiscoverScreen(
             Spacer(Modifier.height(11.dp))
             Row(Modifier.fillMaxWidth(),horizontalArrangement=Arrangement.SpaceBetween,
                 verticalAlignment=Alignment.CenterVertically){
-                Text(results.size.toString()+" opportunities",
+                Text((rendered?.size?:0).toString()+" opportunities",
                     style=MaterialTheme.typography.labelLarge)
                 Text(when(filters.sort){
                     "closing"->"Closing earliest"
@@ -108,7 +119,9 @@ fun DiscoverScreen(
             }
             Spacer(Modifier.height(6.dp))
         }
-        if(results.isEmpty()){
+        if(rendered==null){
+            item{LinearProgressIndicator(modifier=Modifier.fillMaxWidth().padding(vertical=14.dp),color=TB.accent)}
+        }else if(rendered.isEmpty()){
             item{
                 StateMessage(
                     if(all.isEmpty())"No offline records" else "No matching tenders",
@@ -119,9 +132,9 @@ fun DiscoverScreen(
                 )
             }
         }else{
-            items(results,key={it.id}){t->
+            itemsIndexed(rendered,key={_,t->t.id}){index,t->
                 TenderListItem(t,saved=t.id in saved,onOpen={onOpen(t.id)},
-                    onBookmark={onSave(t.id)})
+                    onBookmark={onSave(t.id)},highlighted=index==0)
             }
         }
     }
