@@ -47,7 +47,8 @@ fun InsightsScreen(all:List<Tender>,lastSync:String?,selectedTab:String,
                 listOf("Provinces","Buyers","Categories").forEach{key->
                     if(selectedTab==key)Button(onClick={onTab(key)},modifier=Modifier.weight(1f),
                         shape=RoundedCornerShape(8.dp),contentPadding=PaddingValues(5.dp)){
-                        Text(key,maxLines=1)
+                        Text(key,maxLines=1,color=androidx.compose.ui.graphics.Color.White,
+                            style=MaterialTheme.typography.labelLarge)
                     }else OutlinedButton(onClick={onTab(key)},modifier=Modifier.weight(1f),
                         shape=RoundedCornerShape(8.dp),contentPadding=PaddingValues(5.dp)){
                         Text(key,maxLines=1)
