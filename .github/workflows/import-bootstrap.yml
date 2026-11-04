@@ -1,0 +1,19 @@
+name: One-time official tender bootstrap bridge
+on:
+  push:
+    paths:
+      - .github/workflows/import-bootstrap.yml
+  workflow_dispatch:
+jobs:
+  official-source:
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Export normalized public official opportunity records to action logs
+        run: node scripts/bootstrap-bridge.mjs
