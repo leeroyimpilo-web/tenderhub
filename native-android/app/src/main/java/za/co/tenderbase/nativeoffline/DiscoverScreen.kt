@@ -52,7 +52,7 @@ fun DiscoverScreen(
             Text("National Treasury eTenders",style=MaterialTheme.typography.bodyMedium)
             Spacer(Modifier.height(18.dp))
             Row(horizontalArrangement=Arrangement.spacedBy(8.dp),verticalAlignment=Alignment.CenterVertically){
-                OutlinedTextField(
+                TextField(
                     value=filters.query,onValueChange=onQuery,
                     modifier=Modifier.weight(1f).testTag("discover-query"),
                     placeholder={Text("Keyword or tender number",maxLines=1)},
@@ -63,6 +63,15 @@ fun DiscoverScreen(
                         }
                     },
                     singleLine=true,shape=RoundedCornerShape(10.dp),
+                    colors=TextFieldDefaults.colors(
+                        focusedContainerColor=TB.text,unfocusedContainerColor=TB.text,
+                        focusedTextColor=Color.White,unfocusedTextColor=Color.White,
+                        focusedPlaceholderColor=Color.White.copy(alpha=.78f),
+                        unfocusedPlaceholderColor=Color.White.copy(alpha=.78f),
+                        focusedLeadingIconColor=Color.White,unfocusedLeadingIconColor=Color.White,
+                        focusedTrailingIconColor=Color.White,unfocusedTrailingIconColor=Color.White,
+                        focusedIndicatorColor=Color.Transparent,unfocusedIndicatorColor=Color.Transparent
+                    ),
                     keyboardOptions=KeyboardOptions(imeAction=ImeAction.Search),
                     keyboardActions=KeyboardActions(onSearch={focus.clearFocus()})
                 )
