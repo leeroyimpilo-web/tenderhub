@@ -8,11 +8,12 @@ import androidx.compose.runtime.setValue
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.CancellationException
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.sync.Mutex
-import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.withContext
 import java.time.Instant
 
@@ -30,7 +31,7 @@ class TenderViewModel(application:Application):AndroidViewModel(application){
     var message by mutableStateOf<String?>(null)
         private set
     val notesStatus=mutableStateMapOf<String,String>()
-    private val noteLock=Mutex()
+    private val noteJobs=mutableMapOf<String,Job>()
     private val revisions=mutableMapOf<String,Int>()
     init {
         viewModelScope.launch(Dispatchers.IO){
@@ -81,14 +82,20 @@ class TenderViewModel(application:Application):AndroidViewModel(application){
         val version=(revisions[id]?:0)+1
         revisions[id]=version
         notesStatus[id]="Saving…"
-        viewModelScope.launch{
+        // Only persist the latest text after a short typing pause. Previously every
+        // keystroke queued a separate Room write and could stall slower phones.
+        noteJobs[id]?.cancel()
+        noteJobs[id]=viewModelScope.launch{
             try{
-                noteLock.withLock{
-                    withContext(Dispatchers.IO){dao.updateNotes(id,text,Instant.now().toString())}
-                }
+                delay(250)
+                withContext(Dispatchers.IO){dao.updateNotes(id,text,Instant.now().toString())}
                 if(revisions[id]==version)notesStatus[id]="Saved on this device"
+            }catch(_:CancellationException){
+                // Superseded by a newer edit; do not display an error.
             }catch(_:Exception){
                 if(revisions[id]==version)notesStatus[id]="Failed to save"
+            }finally{
+                if(revisions[id]==version)noteJobs.remove(id)
             }
         }
     }
