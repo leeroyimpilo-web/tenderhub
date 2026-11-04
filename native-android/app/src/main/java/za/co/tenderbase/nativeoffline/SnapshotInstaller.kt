@@ -22,7 +22,7 @@ object SnapshotInstaller {
         var exportTime = ""
         var serverSync = ""
 
-        context.assets.open("bootstrap.jsonl.gz").use { asset ->
+        context.assets.open("bootstrap.tenderpack").use { asset ->
             GZIPInputStream(asset).use { gzip ->
                 BufferedReader(InputStreamReader(gzip, Charsets.UTF_8)).use { reader ->
                     val header = JSONObject(reader.readLine() ?: error("Snapshot header missing"))

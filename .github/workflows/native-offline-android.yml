@@ -33,7 +33,7 @@ jobs:
           TENDERBASE_API_URL: https://tenderhub-v2.onrender.com
       - name: Verify real offline records exist
         run: |
-          test -s native-android/app/src/main/assets/bootstrap.jsonl.gz
+          test -s native-android/app/src/main/assets/bootstrap.tenderpack
           node -e "const m=require('./native-android/app/src/main/assets/snapshot-info.json');if(m.count<1000)process.exit(1);console.log('Records packaged: '+m.count)"
       - name: Compile native offline Android APK
         working-directory: native-android
@@ -43,7 +43,7 @@ jobs:
           test -s native-android/app/build/outputs/apk/debug/app-debug.apk
           unzip -Z -1 native-android/app/build/outputs/apk/debug/app-debug.apk > /tmp/tenderbase-apk-entries.txt
           grep -F 'bootstrap' /tmp/tenderbase-apk-entries.txt || true
-          grep -Fx 'assets/bootstrap.jsonl.gz' /tmp/tenderbase-apk-entries.txt
+          grep -Fx 'assets/bootstrap.tenderpack' /tmp/tenderbase-apk-entries.txt
       - name: Upload native offline APK
         uses: actions/upload-artifact@v4
         with:

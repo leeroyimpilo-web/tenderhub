@@ -54,6 +54,6 @@ const lines=[JSON.stringify(header),...rows.map(t=>JSON.stringify(t))].join('\n'
 const zipped=gzipSync(Buffer.from(lines),{level:9});
 const dest=path.resolve('native-android/app/src/main/assets');
 await fs.mkdir(dest,{recursive:true});
-await fs.writeFile(path.join(dest,'bootstrap.jsonl.gz'),zipped);
+await fs.writeFile(path.join(dest,'bootstrap.tenderpack'),zipped);
 await fs.writeFile(path.join(dest,'snapshot-info.json'),JSON.stringify({...header,compressedBytes:zipped.length},null,2));
 console.log('Verified official snapshot: '+rows.length+' records, '+zipped.length+' gzip bytes, updated '+health.lastSync);
