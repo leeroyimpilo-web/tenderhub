@@ -7,7 +7,7 @@ import {CalendarButton} from '@/components/TenderActions';
 export default function Alerts(){
  const {data,ready,dismissAlert,resetAlerts}=useLocal();
  const days=data.settings.remindDays;
- const matches=data.saved.filter(t=>{const d=daysUntil(t.closing_at);return d!==null&&d>=0&&d<=days&&!data.dismissedAlerts.includes(t.id)}).sort((a,b)=>(a.closing_at??'').localeCompare(b.closing_at??''));
+ const matches=data.saved.filter(t=>{const d=daysUntil(t.closing_at);return d!==null&&d>=0&&d<=days&&!data.dismissedAlerts.includes(t.id+'|'+t.closing_at)}).sort((a,b)=>(a.closing_at??'').localeCompare(b.closing_at??''));
  return <main className="tb-v2-content">
   <p className="tb-v2-eyebrow">Your attention</p><h1 className="tb-v2-heading mt-2">Deadline alerts</h1>
   <p className="tb-v2-muted mt-2">In-app alerts for saved tenders closing in the next {days} days. These are checked when you open TenderBase; Android background notifications are not enabled yet.</p>
