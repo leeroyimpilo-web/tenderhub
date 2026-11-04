@@ -1,7 +1,7 @@
 name: Build TenderBase Android APK
 on:
   push:
-    branches: [main]
+    branches: [main, development/ui-features-v2]
     paths:
       - .github/workflows/android-build.yml
       - capacitor.config.ts
@@ -81,6 +81,6 @@ jobs:
       - name: Upload installable Android APK
         uses: actions/upload-artifact@v4
         with:
-          name: TenderBase-v2-Android-debug
+          name: TenderBase-v2-development-Android-debug
           path: android/app/build/outputs/apk/debug/app-debug.apk
           if-no-files-found: error
