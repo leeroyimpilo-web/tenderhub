@@ -5,15 +5,26 @@ import java.time.format.DateTimeFormatter
 import java.time.temporal.ChronoUnit
 
 private val saZone=ZoneId.of("Africa/Johannesburg")
+// Parsing date strings inside hundreds of cards/sorts on every recomposition made the UI
+// noticeably unresponsive on entry-level Android devices. A bounded shared cache avoids
+// repeated formatter work without retaining an unbounded number of imported notices.
+private val instantCache=object:LinkedHashMap<String,Instant?>(4096,0.75f,true){
+    override fun removeEldestEntry(eldest:MutableMap.MutableEntry<String,Instant?>?)=size>8192
+}
 fun tenderInstant(value:String?):Instant?{
     if(value.isNullOrBlank())return null
-    return try{Instant.parse(value)}catch(_:Exception){
+    synchronized(instantCache){
+        if(instantCache.containsKey(value))return instantCache[value]
+    }
+    val parsed=try{Instant.parse(value)}catch(_:Exception){
         try{OffsetDateTime.parse(value).toInstant()}catch(_:Exception){
             try{LocalDateTime.parse(value).atZone(saZone).toInstant()}catch(_:Exception){
                 try{LocalDate.parse(value).atStartOfDay(saZone).toInstant()}catch(_:Exception){null}
             }
         }
     }
+    synchronized(instantCache){instantCache[value]=parsed}
+    return parsed
 }
 fun sourceHasTime(value:String?):Boolean{
     if(value.isNullOrBlank() || !value.contains("T"))return false
