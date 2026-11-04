@@ -5,8 +5,8 @@ if(!appUrl || !/^https:\/\/[^\s/]+(?:\/.*)?$/.test(appUrl)){
 }
 const parsed=new URL(appUrl);
 const config:CapacitorConfig={
- appId:'za.co.tenderbase.open',
- appName:'TenderBase',
+ appId:'za.co.tenderbase.dev',
+ appName:'TenderBase Dev',
  webDir:'capacitor-www',
  server:{url:parsed.origin,androidScheme:'https',cleartext:false},
  android:{allowMixedContent:false}
