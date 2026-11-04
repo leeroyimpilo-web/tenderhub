@@ -44,13 +44,13 @@ export default async function Details({params}:{params:{id:string}}){
    <div className="flex flex-col gap-4">
     <section className="tb-v2-panel">
      <h2 className="font-semibold text-navy text-[17px] mb-3">Tender documents ({t.documents.length})</h2>
-     {t.documents.length?<div className="tb-v2-list">{t.documents.map((d,i)=><a key={d.id+'-'+i} href={d.url} target="_blank" rel="noreferrer" className="flex items-center justify-between gap-3 border-b border-line py-2 text-[12px] text-blue hover:underline"><span className="flex items-center gap-2 break-all"><FileText size={17} className="shrink-0"/>{d.title}</span><ExternalLink size={14} className="shrink-0"/></a>)}</div>:<p className="tb-v2-muted">The OCDS release does not provide any document download links. Check the publisher notice.</p>}
+     {t.documents.length?<div className="tb-v2-list">{t.documents.map((d,i)=><a key={d.id+'-'+i} href={d.url} target="_blank" rel="noreferrer" className="flex items-center justify-between gap-3 border-b border-line py-2 text-[12px] text-blue hover:underline"><span className="flex items-center gap-2 break-all"><FileText size={17} className="shrink-0"/>{d.title}</span><ExternalLink size={14} className="shrink-0"/></a>)}</div>:<p className="tb-v2-muted">The official notice does not provide downloadable documents. Check the original publication.</p>}
     </section>
     <section className="tb-v2-panel">
      <h2 className="font-semibold text-navy text-[17px] mb-3">Source & verification</h2>
-     <p className="tb-v2-muted">OCDS ID: <span className="break-all">{t.id}</span></p>
+     <p className="tb-v2-muted">Source record ID: <span className="break-all">{t.id}</span></p>
      <p className="tb-v2-muted mt-2">Locally indexed: {fmtDate(t.synced_at)}</p>
-     <a href="https://www.etenders.gov.za/Home/opportunities?id=1" target="_blank" rel="noreferrer" className="tb-v2-primary mt-4"><ExternalLink size={16}/> Open official eTenders portal</a>
+     <a href={t.source_url} target="_blank" rel="noreferrer" className="tb-v2-primary mt-4"><ExternalLink size={16}/> Open official notice</a>
      <p className="tb-v2-muted mt-3">Source information is provided by National Treasury and should be checked with the procuring entity.</p>
     </section>
    </div>
